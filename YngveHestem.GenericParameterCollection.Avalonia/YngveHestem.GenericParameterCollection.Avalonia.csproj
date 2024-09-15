@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.1.3" />
+    <PackageReference Include="YngveHestem.GenericParameterCollection" Version="1.1.5" />
+
+    <Version>1.0.0-beta01</Version>
+    <Description>This provides controls for using GenericParameterCollection in an AvaloniaUI-application.</Description>
+    <PackageReleaseNotes>
+        - Initial release.
+    </PackageReleaseNotes>
+    <Authors>Yngve J. K. Hestem</Authors>
+    <Copyright>Copyright (c) Yngve J. K. Hestem 2024</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>UI, parameter ParameterCollection collection avalonia avaloniaUI GUI parameters collections multiple-types-in-collection json key-value key-value-pair</PackageTags>
+    <RepositoryUrl>https://github.com/HeruEwasham/GenericParameterCollection.Avalonia.git</RepositoryUrl> 
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ParameterComponents/DefaultComponents/" />
+  </ItemGroup>
+
+</Project>
