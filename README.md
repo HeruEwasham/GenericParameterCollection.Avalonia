@@ -88,7 +88,7 @@ If you define this in a ParameterCollection-ParameterType, the changes will affe
 | DateFormatDay | dateFormatDay | string | Specifies how the format of the day is on Date and DateTime-parameters. | dd |
 | DateFormatMonth | dateFormatMonth | string | Specifies how the format of the month is on Date and DateTime-parameters. | MMMM |
 | DateFormatYear | dateFormatYear | string | Specifies how the format of the year is on Date and DateTime-parameters. | yyyy |
-| MinutesStep | minutesStep | int | Specifies how much the gui should increment the minute when the minute step is clicked. | 1.0 |
+| MinutesStep | minutesStep | int | Specifies how much the gui should increment the minute when the minute step is clicked. | 1 |
 | ClockIdentifier | clockIdentifier | string | Specifies if the timer in a DateTime should be 12 or 24 hours. It need to either be "12HourClock" or "24HourClock". | 24HourClock |
 | AddEntryToListText | addEntryToListText | string | Specifies the text on the button to add a new object to the list. | Add |
 | DeleteEntryFromListText | deleteEntryFromListText | string | Specifies the text on the button to delete the given object from the list. | Delete |
