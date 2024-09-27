@@ -1,8 +1,24 @@
-﻿namespace YngveHestem.GenericParameterCollection.Avalonia
+﻿using System;
+using Avalonia.Media;
+using YngveHestem.FileTypeInfo;
+using YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters;
+using YngveHestem.GenericParameterCollection.ParameterValueConverters;
+
+namespace YngveHestem.GenericParameterCollection.Avalonia
 {
     [AttributeConvertible]
     	public class ParameterCollectionViewOptions
     	{
+            public static readonly IParameterValueConverter[] OptionsParameterConverters = new IParameterValueConverter[]
+            {
+                new IBrushConverter(),
+                new ThicknessConverter(),
+                new CornerRadiusConverter(),
+                new BoxShadowsConverter(),
+                new FileTypeConverter()
+            };
+
+
             /// <summary>
             /// Will a parameters additionalInfo override the given parameters if correct parameters are given?
             /// </summary>
@@ -58,6 +74,18 @@
             public decimal StepDecimal = 0.1m;
 
             /// <summary>
+            /// Specifies how the int numbers should be shown.
+            /// </summary>
+            [ParameterProperty("numberFormatInt")]
+            public string NumberFormatInt = "0";
+
+            /// <summary>
+            /// Specifies how the decimal numbers should be shown.
+            /// </summary>
+            [ParameterProperty("numberFormatDecimal")]
+            public string NumberFormatDecimal = "0.00";
+
+            /// <summary>
             /// Specifies the placeholder text on controls that support that.
             /// </summary>
             [ParameterProperty("placeholder")]
@@ -73,25 +101,31 @@
             /// Specifies max number of characters that can be given in a text.
             /// </summary>
             [ParameterProperty("maxChars")]
-            public long? MaxNumberOfCharacters = null;
+            public int? MaxNumberOfCharacters = null;
 
             /// <summary>
-            /// Specifies the number of rows a textarea will show.
+            /// Specifies the height of a textarea.
             /// </summary>
-            [ParameterProperty("textareaRows")]
-            public int NumberOfRowsInTextArea = 5;
+            [ParameterProperty("textareaHeight")]
+            public double TextAreaHeight = 100;
 
             /// <summary>
-            /// Specifies the number of columns (characters) a textarea will show horizontally.
+            /// Specifies the width of a textarea. Null means that the default length will be used.
             /// </summary>
-            [ParameterProperty("textareaColumns")]
-            public int NumberOfColumnsInTextArea = 100;
+            [ParameterProperty("textareaWidth")]
+            public double? TextAreaWidth = null;
 
             /// <summary>
-            /// Specifies what mime types are accepted when selecting file.
+            /// Defines what types of file extensions is supported when selecting files for ParameterType.Bytes. All must have a leading .
+            /// Empty string[] means all types supported/no filter added.
             /// </summary>
-            [ParameterProperty("acceptedMimeTypes")]
-            public string[] AcceptedMimeTypes = null;
+            [ParameterProperty("supportedExtensions")]
+            public string[] SupportedFileExtensions = null;
+
+            /// <summary>
+            /// List of different file types and mappings between extensions, UTType (UTI) and mime-types. All file extensions in SupportedFileExtensions must be defined here to be supported. Default value is all the values that is defined in the library used. Check for yourself if you need to add your own values.
+            /// </summary>
+            public FileType[] FileTypeMappings = FileTypes.Types;
 
             /// <summary>
             /// Specifies the text to show on the Choose file button.
@@ -124,34 +158,34 @@
             public int FilePreviewWidth = 500;
 
             /// <summary>
-            /// Specifies the time format to be shown in DateTime-parameters.
+            /// Specifies how the format of the day is on Date and DateTime-parameters.
             /// </summary>
-            [ParameterProperty("dateTimeFormat")]
-            public string DateTimeFormat = "g";
+            [ParameterProperty("dateFormatDay")]
+            public string DateFormatDay = "dd";
 
             /// <summary>
-            /// Specifies the time format to be shown in Date-parameters.
+            /// Specifies how the format of the month is on Date and DateTime-parameters.
             /// </summary>
-            [ParameterProperty("dateFormat")]
-            public string DateFormat = "d";
+            [ParameterProperty("dateFormatMonth")]
+            public string DateFormatMonth = "MMMM";
 
             /// <summary>
-            /// Specifies how much the gui should increment the hour when the hour step is clicked.
+            /// Specifies how the format of the year is on Date and DateTime-parameters.
             /// </summary>
-            [ParameterProperty("hoursStep")]
-            public decimal HoursStep = 1.0m;
+            [ParameterProperty("dateFormatYear")]
+            public string DateFormatYear = "yyyy";
 
             /// <summary>
             /// Specifies how much the gui should increment the minute when the minute step is clicked.
             /// </summary>
             [ParameterProperty("minutesStep")]
-            public decimal MinutesStep = 1.0m;
+            public int MinutesStep = 1;
 
             /// <summary>
-            /// Specifies how much the gui should increment the second when the second step is clicked.
+            /// Specifies if the timer in a DateTime should be 12 or 24 hours. It need to either be "12HourClock" or "24HourClock".
             /// </summary>
-            [ParameterProperty("secondsStep")]
-            public decimal SecondsStep = 1.0m;
+            [ParameterProperty("clockIdentifier")]
+            public string ClockIdentifier = "24HourClock";
 
             /// <summary>
             /// The earliest date that is possible to pick.
@@ -193,7 +227,7 @@
             /// Defines how any parent component is shown when using "extra parameters" like "parametersIf:true" and "parametersIf:false".
             /// </summary>
             [ParameterProperty("parentTypeWhenHavingExtraParameters")]
-            public ComponentParentType ParentTypeWhenHavingExtraParameters = ComponentParentType.None;
+            public ExtraParametersParentType ParentTypeWhenHavingExtraParameters = ExtraParametersParentType.None;
 
             /// <summary>
             /// Specifies the text used on the the collection of extra parameters (not all ParentTypeWhenHavingExtraParameters-options use it). You can use {0} to get the parameterName of the main parameter and use {1} to get the value of the main parameter.
@@ -225,6 +259,48 @@
             [ParameterProperty("borderOptions")]
             public BorderOptions BorderOptions = new BorderOptions();
 
+            /// <summary>
+            /// The options for the expander.
+            /// </summary>
+            [ParameterProperty("expanderOptions")]
+            public ExpanderOptions ExpanderOptions = new ExpanderOptions();
+
+            /// <summary>
+            /// What should the text around where the number of bytes in selected file be. {0} inserts the bytes in readdable size.
+            /// </summary>
+            [ParameterProperty("byteSizeText")]
+            public string ByteSizeText = "Selected item has size: {0}";
+
+            /// <summary>
+            /// What should the text around the filename be. {0} inserts the filename.
+            /// </summary>
+            [ParameterProperty("filenameText")]
+            public string FilenameText = "Filename: {0}";
+
+            /// <summary>
+            /// What should the text to display when preview of byte-content is not available be.
+            /// </summary>
+            [ParameterProperty("previewContentNotAvailableText")]
+            public string PreviewOfThisContentNotAvailableText = "Preview of this content not available.";
+
+            /// <summary>
+            /// What should the text be when no file are selected.
+            /// </summary>
+            [ParameterProperty("noBytesSelectedText")]
+            public string NoBytesSelectedText = "No file selected.";
+
+            /// <summary>
+            /// What should the text be when the file to be selected was bigger than MaxFileSize. {0} inserts the filename. {1} inserts the size of the file formatted in a readable size. {2} inserts the MaxFileSize in a readdable size.
+            /// </summary>
+            [ParameterProperty("maxFileSizeErrorText")]
+            public string MaxFileSizeErrorText = "File \"{0}\" has size {1}. But we only allows files up to {2}.";
+
+            /// <summary>
+            /// The text to display on the button to set a value to null. The button is used on some controls, when isNullable is set, that do not handle setting a value to null another way.
+            /// </summary>
+            [ParameterProperty("setToNullButtonText")]
+            public string SetToNullButtonText = "Set to null";
+
             public ParameterCollectionViewOptions CreateCopy()
             {
                 return new ParameterCollectionViewOptions
@@ -238,22 +314,25 @@
                     MaxNumber = MaxNumber,
                     StepInteger = StepInteger,
                     StepDecimal = StepDecimal,
+                    NumberFormatInt = NumberFormatInt,
+                    NumberFormatDecimal = NumberFormatDecimal,
                     PlaceholderText = PlaceholderText,
                     IsPassword = IsPassword,
                     MaxNumberOfCharacters = MaxNumberOfCharacters,
-                    NumberOfRowsInTextArea = NumberOfRowsInTextArea,
-                    NumberOfColumnsInTextArea = NumberOfColumnsInTextArea,
-                    AcceptedMimeTypes = AcceptedMimeTypes,
+                    TextAreaHeight = TextAreaHeight,
+                    TextAreaWidth = TextAreaWidth,
+                    SupportedFileExtensions = SupportedFileExtensions,
+                    FileTypeMappings = FileTypeMappings,
                     ChooseFileText = ChooseFileText,
                     DeleteFileText = DeleteFileText,
                     MaxFileSize = MaxFileSize,
                     FilePreviewHeight = FilePreviewHeight,
                     FilePreviewWidth = FilePreviewWidth,
-                    DateTimeFormat = DateTimeFormat,
-                    DateFormat = DateFormat,
-                    HoursStep = HoursStep,
+                    DateFormatDay = DateFormatDay,
+                    DateFormatMonth = DateFormatMonth,
+                    DateFormatYear = DateFormatYear,
                     MinutesStep = MinutesStep,
-                    SecondsStep = SecondsStep,
+                    ClockIdentifier = ClockIdentifier,
                     MinDate = MinDate,
                     MaxDate = MaxDate,
                     AddEntryToListText = AddEntryToListText,
@@ -266,6 +345,13 @@
                     SelectManyExtraParametersName = SelectManyExtraParametersName,
                     IsNullable = IsNullable,
                     BorderOptions = BorderOptions,
+                    ExpanderOptions = ExpanderOptions,
+                    ByteSizeText = ByteSizeText,
+                    FilenameText = FilenameText,
+                    PreviewOfThisContentNotAvailableText = PreviewOfThisContentNotAvailableText,
+                    NoBytesSelectedText = NoBytesSelectedText,
+                    MaxFileSizeErrorText = MaxFileSizeErrorText,
+                    SetToNullButtonText = SetToNullButtonText
                 };
             }
 
@@ -356,6 +442,23 @@
                     options.StepDecimal = parameters.GetByKey<decimal>("stepDecimal");
                 }
 
+                if (parameters.HasKeyAndCanConvertTo("numberFormat", typeof(string)))
+                {
+                    var format = parameters.GetByKey<string>("numberFormat");
+                    options.NumberFormatInt = format;
+                    options.NumberFormatDecimal = format;
+                }
+
+                if (parameters.HasKeyAndCanConvertTo("numberFormatInt", typeof(string)))
+                {
+                    options.NumberFormatInt = parameters.GetByKey<string>("numberFormatInt");
+                }
+
+                if (parameters.HasKeyAndCanConvertTo("numberFormatDecimal", typeof(string)))
+                {
+                    options.NumberFormatDecimal = parameters.GetByKey<string>("numberFormatDecimal");
+                }
+
                 if (parameters.HasKeyAndCanConvertTo("placeholder", typeof(string)))
                 {
                     options.PlaceholderText = parameters.GetByKey<string>("placeholder");
@@ -366,9 +469,9 @@
                     options.IsPassword = parameters.GetByKey<bool>("isPassword");
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("maxChars", typeof(long)))
+                if (parameters.HasKeyAndCanConvertTo("maxChars", typeof(int?)))
                 {
-                    var v = parameters.GetByKey<long>("maxChars");
+                    var v = parameters.GetByKey<int?>("maxChars");
                     if (v < 0)
                     {
                         options.MaxNumberOfCharacters = null;
@@ -379,19 +482,24 @@
                     }
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("textareaRows", typeof(int)))
+                if (parameters.HasKeyAndCanConvertTo("textareaHeight", typeof(double)))
                 {
-                    options.NumberOfRowsInTextArea = parameters.GetByKey<int>("textareaRows");
+                    options.TextAreaHeight = parameters.GetByKey<double>("textareaHeight");
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("textareaColumns", typeof(int)))
+                if (parameters.HasKeyAndCanConvertTo("textareaWidth", typeof(double?)))
                 {
-                    options.NumberOfColumnsInTextArea = parameters.GetByKey<int>("textareaColumns");
+                    options.TextAreaWidth = parameters.GetByKey<double?>("textareaWidth");
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("acceptedMimeTypes", typeof(string[])))
+                if (parameters.HasKeyAndCanConvertTo("supportedExtensions", typeof(string[])))
                 {
-                    options.AcceptedMimeTypes = parameters.GetByKey<string[]>("acceptedMimeTypes");
+                    options.SupportedFileExtensions = parameters.GetByKey<string[]>("supportedExtensions");
+                }
+
+                if (parameters.HasKeyAndCanConvertTo("fileTypeMappings", typeof(FileType[]), OptionsParameterConverters))
+                {
+                    options.FileTypeMappings = parameters.GetByKey<FileType[]>("fileTypeMappings", OptionsParameterConverters);
                 }
 
                 if (parameters.HasKeyAndCanConvertTo("chooseFileText", typeof(string)))
@@ -419,29 +527,29 @@
                     options.FilePreviewWidth = parameters.GetByKey<int>("previewWidth");
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("dateTimeFormat", typeof(string)))
+                if (parameters.HasKeyAndCanConvertTo("dateFormatDay", typeof(string)))
                 {
-                    options.DateTimeFormat = parameters.GetByKey<string>("dateTimeFormat");
+                    options.DateFormatDay = parameters.GetByKey<string>("dateFormatDay");
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("dateFormat", typeof(string)))
+                if (parameters.HasKeyAndCanConvertTo("dateFormatMonth", typeof(string)))
                 {
-                    options.DateFormat = parameters.GetByKey<string>("dateFormat");
+                    options.DateFormatMonth = parameters.GetByKey<string>("dateFormatMonth");
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("hoursStep", typeof(decimal)))
+                if (parameters.HasKeyAndCanConvertTo("dateFormatYear", typeof(string)))
                 {
-                    options.HoursStep = parameters.GetByKey<decimal>("hoursStep");
+                    options.DateFormatYear = parameters.GetByKey<string>("dateFormatYear");
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("minutesStep", typeof(decimal)))
+                if (parameters.HasKeyAndCanConvertTo("minutesStep", typeof(int)))
                 {
-                    options.MinutesStep = parameters.GetByKey<decimal>("minutesStep");
+                    options.MinutesStep = parameters.GetByKey<int>("minutesStep");
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("secondsStep", typeof(decimal)))
+                if (parameters.HasKeyAndCanConvertTo("clockIdentifier", typeof(string)))
                 {
-                    options.SecondsStep = parameters.GetByKey<decimal>("secondsStep");
+                    options.ClockIdentifier = parameters.GetByKey<string>("clockIdentifier");
                 }
 
                 if (parameters.HasKeyAndCanConvertTo("minDate", typeof(DateTime)))
@@ -474,9 +582,9 @@
                     options.AddEntryToListAriaDescription = parameters.GetByKey<string>("addEntryToListAriaDescription");
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("parentTypeWhenHavingExtraParameters", typeof(ComponentParentType)))
+                if (parameters.HasKeyAndCanConvertTo("parentTypeWhenHavingExtraParameters", typeof(ExtraParametersParentType)))
                 {
-                    options.ParentTypeWhenHavingExtraParameters = parameters.GetByKey<ComponentParentType>("parentTypeWhenHavingExtraParameters");
+                    options.ParentTypeWhenHavingExtraParameters = parameters.GetByKey<ExtraParametersParentType>("parentTypeWhenHavingExtraParameters");
                 }
 
                 if (parameters.HasKeyAndCanConvertTo("extraParametersName", typeof(string)))
@@ -499,9 +607,44 @@
                     options.IsNullable = parameters.GetByKey<bool>("isNullable");
                 }
 
-                if (parameters.HasKeyAndCanConvertTo("borderOptions", typeof(BorderOptions)))
+                if (parameters.HasKeyAndCanConvertTo("borderOptions", typeof(BorderOptions), OptionsParameterConverters))
                 {
-                    options.BorderOptions = parameters.GetByKey<BorderOptions>("borderOptions");
+                    options.BorderOptions.UpdateFromParameterCollection(parameters.GetByKey<ParameterCollection>("borderOptions", OptionsParameterConverters));
+                }
+
+                if (parameters.HasKeyAndCanConvertTo("expanderOptions", typeof(ExpanderOptions), OptionsParameterConverters))
+                {
+                    options.ExpanderOptions.UpdateFromParameterCollection(parameters.GetByKey<ParameterCollection>("expanderOptions", OptionsParameterConverters));
+                }
+
+                if (parameters.HasKeyAndCanConvertTo("byteSizeText", typeof(string)))
+                {
+                    options.ByteSizeText = parameters.GetByKey<string>("byteSizeText");
+                }
+
+                if (parameters.HasKeyAndCanConvertTo("filenameText", typeof(string)))
+                {
+                    options.FilenameText = parameters.GetByKey<string>("filenameText");
+                }
+
+                if (parameters.HasKeyAndCanConvertTo("previewContentNotAvailableText", typeof(string)))
+                {
+                    options.PreviewOfThisContentNotAvailableText = parameters.GetByKey<string>("previewContentNotAvailableText");
+                }
+
+                if (parameters.HasKeyAndCanConvertTo("noBytesSelectedText", typeof(string)))
+                {
+                    options.NoBytesSelectedText = parameters.GetByKey<string>("noBytesSelectedText");
+                }
+
+                if (parameters.HasKeyAndCanConvertTo("maxFileSizeErrorText", typeof(string)))
+                {
+                    options.MaxFileSizeErrorText = parameters.GetByKey<string>("maxFileSizeErrorText");
+                }
+
+                if (parameters.HasKeyAndCanConvertTo("setToNullButtonText", typeof(string)))
+                {
+                    options.SetToNullButtonText = parameters.GetByKey<string>("setToNullButtonText");
                 }
 
                 return options;

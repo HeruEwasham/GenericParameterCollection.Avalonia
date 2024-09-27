@@ -1,4 +1,7 @@
-﻿using YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents;
+﻿using System;
+using System.Globalization;
+using YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents;
+using YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.DefaultComponents;
 
 namespace YngveHestem.GenericParameterCollection.Avalonia
 {
@@ -6,7 +9,11 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
     {
         internal static IParameterComponentDefinition[] DefaultParameterComponents = new IParameterComponentDefinition[] 
         {
-            
+            new StringParameterComponent(),
+            new IntDecimalParameterComponent(),
+            new BytesParameterComponent(),
+            new BoolParameterComponent(),
+            new DateTimeParameterComponent()
         };
         
 		public static ParameterCollection DeepCopyJson(this ParameterCollection parameters)
@@ -17,6 +24,25 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
         public static string HumanReadable(this string text)
         {
             return text.FirstCharToUpper();
+        }
+
+        public static string GetSizeInMemory(this int bytesize)
+        {
+            return GetSizeInMemory((ulong)bytesize);
+        }
+
+        public static string GetSizeInMemory(this ulong bytesize)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            double len = Convert.ToDouble(bytesize);
+            int order = 0;
+            while (len >= 1024D && order < sizes.Length - 1)
+            {
+                order++;
+                len /= 1024;
+            }
+
+            return string.Format(CultureInfo.CurrentCulture, "{0:0.##} {1}", len, sizes[order]);
         }
 
         public static string FirstCharToUpper(this string input)

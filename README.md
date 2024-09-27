@@ -66,24 +66,30 @@ If you define this in a ParameterCollection-ParameterType, the changes will affe
 | StepInteger and StepDecimal | step | decimal | Defines how much a number (both integers and decimals) should increment/decrement with if the increment/decrement buttons are used | if int, 1, if a decimal-number, 0.1 |
 | StepInteger | stepInt | int | Specifies how much the gui should increment the value on an int value if the step-button is pressed. | 1 |
 | StepDecimal | stepDecimal | decimal | Specifies how much the gui should increment the value on a decimal value if the step-button is pressed. | 0.1 |
+| NumberFormatInt and NumberFormatDecimal | numberFormat | string | Defines how both integers and decimals should be shown. | if int, "0", if a decimal-number, "0.00" |
+| NumberFormatInt | numberFormatInt | string | Specifies how the int numbers should be shown. | 0 |
+| NumberFormatDecimal | numberFormatDecimal | string | Specifies how the decimal numbers should be shown. | 0.00 |
 | PlaceholderText | placeholder | string | Specifies the placeholder text on controls that support that. | string.Empty |
 | IsPassword | isPassword | bool | Specifies if strings should be shown as password (without readable characters). | false |
-| MaxNumberOfCharacters | maxChars | long? | Specifies max number of characters that can be given in a text. | null |
-| NumberOfRowsInTextArea | textareaRows | int | Specifies the number of rows a textarea will show. | 5 |
-| NumberOfColumnsInTextArea | textareaColumns | int | Specifies the number of columns (characters) a textarea will show horizontally. | 100 |
-| AcceptedMimeTypes | acceptedMimeTypes | string[] | Specifies what mime types are accepted when selecting file. | null |
+| MaxNumberOfCharacters | maxChars | int? | Specifies max number of characters that can be given in a text. | null |
+| TextAreaHeight | textareaHeight | double | Specifies the height of a textarea. | 100 |
+| TextAreaWidth | textareaWidth | double? | Specifies the width of a textarea. Null means that the default length will be used. | null |
+| SupportedFileExtensions | supportedExtensions | string[] | Defines what types of file extensions is supported when selecting files for ParameterType.Bytes. All must have a leading . | Empty string[] or null means all types supported/no filter added |
+|  | filename | string | This can be added to a Bytes-parameter to give information on what the filename of the file was. This is just for cosmetics and is not neccessarry (but will provide info to the user). When a Bytes-parameter is updated, this parameter in Additionalinfo will also be added/updated by the editor (so if you want to know the filename and uses this editor, this parameter will give you that info) |  |
+|  | extension | string | The file extension for the filetype a Bytes-parameter has. The value should have a leading . This parameter is most likely needed if a preview of the file is wanted. This parameter in Additionalinfo will also be added/updated by the editor when the Bytes-parameter is updated |  |
 | ChooseFileText | chooseFileText | string | Specifies the text to show on the Choose file button. | Choose file |
 | DeleteFileText | deleteFileText | string | Specifies the text to show on the Delete file button. | Delete |
 | MaxFileSize | maxFileSize | int | Specifies the max file size allowed. | 5 * 1024 * 1024 |
 | FilePreviewHeight | previewHeight | int | Specifies the height of the file preview. | 300 |
 | FilePreviewWidth | previewWidth | int | Specifies the width of the file preview. | 500 |
+| FileTypeMappings |  | FileType[] | List of different file types and mappings between extensions, UTType (UTI) and mime-types. All file extensions in SupportedFileExtensions must be defined here to be supported. | Default value is all the values that is defined in the library used. Check for yourself if you need to add your own values. |
 | MinDate | minDate | DateTime | The earliest date that is possible to pick. | DateTime.Today.AddYears(-1000) |
 | MaxDate | maxDate | DateTime | The latest date that is possible to pick. | DateTime.Today.AddYears(1000) |
-| DateTimeFormat | dateTimeFormat | string | Specifies the time format to be shown in DateTime-parameters. | g |
-| DateFormat | dateFormat | string | Specifies the time format to be shown in Date-parameters. | d |
-| HoursStep | hoursStep | decimal | Specifies how much the gui should increment the hour when the hour step is clicked. | 1.0 |
-| MinutesStep | minutesStep | decimal | Specifies how much the gui should increment the minute when the minute step is clicked. | 1.0 |
-| SecondsStep | secondsStep | decimal | Specifies how much the gui should increment the second when the second step is clicked. | 1.0 |
+| DateFormatDay | dateFormatDay | string | Specifies how the format of the day is on Date and DateTime-parameters. | dd |
+| DateFormatMonth | dateFormatMonth | string | Specifies how the format of the month is on Date and DateTime-parameters. | MMMM |
+| DateFormatYear | dateFormatYear | string | Specifies how the format of the year is on Date and DateTime-parameters. | yyyy |
+| MinutesStep | minutesStep | int | Specifies how much the gui should increment the minute when the minute step is clicked. | 1.0 |
+| ClockIdentifier | clockIdentifier | string | Specifies if the timer in a DateTime should be 12 or 24 hours. It need to either be "12HourClock" or "24HourClock". | 24HourClock |
 | AddEntryToListText | addEntryToListText | string | Specifies the text on the button to add a new object to the list. | Add |
 | DeleteEntryFromListText | deleteEntryFromListText | string | Specifies the text on the button to delete the given object from the list. | Delete |
 | DeleteEntryFromListAriaDescription | deleteEntryFromListAriaDescription | string | Specifies the text used to describe the delete button on the given entry in a list for screen readers. You can use {0} to get the current number the entry are in the list, use {1} to get the parameters viewable name and {2} to get the current value. | Delete entry number {0} from the list in parameter "{1}". The entry has the value "{2}". |
@@ -92,7 +98,7 @@ If you define this in a ParameterCollection-ParameterType, the changes will affe
 | | parametersIf:true | ParameterCollection | Any parameters specified here in a bool-parameter will be shown and be editable (if not set to readonly), if the value is set to true. If set to false (or null), this will not be shown. | |
 | | parametersIf:false | ParameterCollection | Any parameters specified here in a bool-parameter will be shown and be editable (if not set to readonly), if the value is set to false. If set to true (or null), this will not be shown. | |
 | | parametersIf:null | ParameterCollection | Any parameters specified here in a bool-parameter will be shown and be editable (if not set to readonly), if the value is set to null. If set to true or false, this will not be shown. | |
-| ParentTypeWhenHavingExtraParameters | parentTypeWhenHavingExtraParameters | ComponentParentType | Defines how any parent component is shown when using "extra parameters" like "parametersIf:true" and "parametersIf:false". Possible valuees are None, Border, BorderWithoutName, Expander | None |
+| ParentTypeWhenHavingExtraParameters | parentTypeWhenHavingExtraParameters | ExtraParametersParentType | Defines how any parent component is shown when using "extra parameters" like "parametersIf:true" and "parametersIf:false". Possible valuees are None, Border, BorderWithoutName, Expander | None |
 | ExtraParametersName | extraParametersName | string | Specifies the text used on the the collection of extra parameters (not all ParentTypeWhenHavingExtraParameters-options use it). You can use {0} to get the parameterName of the main parameter and use {1} to get the value of the main parameter. | Extra parameters when {0} is {1} |
 | | parametersIf:true:name | string | Specifies the text used on the the collection of extra parameters if value is true (not all ParentTypeWhenHavingExtraParameters-options use it). If set, this will be used instead of ExtraParametersName. | |
 | | parametersIf:false:name | string | Specifies the text used on the the collection of extra parameters if value is false (not all ParentTypeWhenHavingExtraParameters-options use it). If set, this will be used instead of ExtraParametersName. | |
@@ -107,3 +113,11 @@ If you define this in a ParameterCollection-ParameterType, the changes will affe
 | SelectManyExtraParametersName | selectManyExtraParametersName | string | Specifies the text used on the the total collection of extra parameters for SelectMany-parameters (not all ParentTypeWhenHavingExtraParameters-options use it). You can use {0} to get the parameterName of the main parameter. | Extra parameters when {0} has theese values |
 | | prettyValues | ParameterCollection | Let you change the values shown to the user on Enum-, SelectOne- and SelectMany-parameter to something other. The value gotten back and sent in must be the correct value. This can be useful if you want to support multiple languages or if you just want to show prettier enum-values to the user. | |
 | IsNullable | isNullable | bool | Should the controls that support it allow setting a value to null or not. | false |
+| BorderOptions | borderOptions | BorderOptions | The options for the border. | Default values for the class |
+| ExpanderOptions | expanderOptions | ExpanderOptions | The options for the expander. | Default values for the class |
+| ByteSizeText | byteSizeText | string | What should the text around where the number of bytes in selected file be. {0} inserts the bytes in readdable size. | Selected item has size: {0} |
+| FilenameText | filenameText | string | What should the text around the filename be. {0} inserts the filename. | Filename: {0} |
+| PreviewOfThisContentNotAvailableText | previewContentNotAvailableText | string | What should the text to display when preview of byte-content is not available be. | Preview of this content not available. |
+| NoBytesSelectedText | noBytesSelectedText | string | What should the text be when no file are selected. | No file selected. |
+| MaxFileSizeErrorText | maxFileSizeErrorText | string | What should the text be when the file to be selected was bigger than MaxFileSize. {0} inserts the filename. {1} inserts the size of the file formatted in a readable size. {2} inserts the MaxFileSize in a readdable size. | File \"{0}\" has size {1}. But we only allows files up to {2}. |
+| SetToNullButtonText | setToNullButtonText | string | The text to display on the button to set a value to null. The button is used on some controls, when isNullable is set, that do not handle setting a value to null another way. | Set to null |

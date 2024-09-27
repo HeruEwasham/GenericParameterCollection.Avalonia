@@ -1,4 +1,5 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using Avalonia.Controls;
 using YngveHestem.GenericParameterCollection.ParameterValueConverters;
 
 namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents

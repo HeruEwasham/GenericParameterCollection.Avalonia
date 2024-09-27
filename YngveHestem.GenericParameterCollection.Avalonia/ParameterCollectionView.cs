@@ -1,4 +1,7 @@
-﻿using Avalonia.Controls;
+﻿using System;
+using System.Linq;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents;
 using YngveHestem.GenericParameterCollection.ParameterValueConverters;
@@ -16,11 +19,22 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
             set
             {
                 _currentParameterCollection = value.DeepCopyJson();
-                InitializeForm(_currentParameterCollection);
+                InitializeForm();
             }
         }
 
-        public ParameterCollectionViewOptions Options {get; set;}
+        public ParameterCollectionViewOptions Options 
+        {
+            get 
+            {
+                return _options;
+            }
+            set
+            {
+                _options = value;
+                InitializeForm();
+            }
+        }
 
         /// <summary>
         /// Do you have any special components to handle a parameter instead of the default ones? Here you can define them.
@@ -33,43 +47,79 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
             } 
             set 
             {
-                _customParameterComponents = value;
-                if (value != null)
-                {
-                    _parameterComponents = value.Concat(Extensions.DefaultParameterComponents).ToArray();
-                }
-                else 
-                {
-                    _parameterComponents = Extensions.DefaultParameterComponents;
-                }
+                SetCustomParameterComponents(value);
+                InitializeForm();
             }
         }
 
         /// <summary>
         /// Do you have any custom converters you want to use to convert the values? Here you can define them.
         /// </summary>
-        public IParameterValueConverter[] CustomConverters { get; set; }
+        public IParameterValueConverter[] CustomConverters 
+        { 
+            get
+            {
+                return _customConverters;
+            }
+            set
+            {
+                _customConverters = value;
+                InitializeForm();
+            } 
+        }
+
+        public static readonly RoutedEvent<ParameterCollectionViewOnChangeEventArgs> ValueChangedEvent =
+        RoutedEvent.Register<ParameterCollectionView, ParameterCollectionViewOnChangeEventArgs>(nameof(ValueChanged), RoutingStrategies.Direct);
+
+        public event EventHandler<ParameterCollectionViewOnChangeEventArgs> ValueChanged
+        {
+            add => AddHandler(ValueChangedEvent, value);
+            remove => RemoveHandler(ValueChangedEvent, value);
+        }
+
+        protected virtual void OnValueChanged(ParameterCollection parameters, string parameterKey)
+        {
+            var args = new ParameterCollectionViewOnChangeEventArgs(ValueChangedEvent, parameters, parameterKey);
+            RaiseEvent(args);
+        }
 
 
         private ParameterCollection _currentParameterCollection;
-
+        private ParameterCollectionViewOptions _options;
         private IParameterComponentDefinition[] _customParameterComponents;
         private IParameterComponentDefinition[] _parameterComponents = Extensions.DefaultParameterComponents;
+        private IParameterValueConverter[] _customConverters;
 
-        private StackPanel parameterComponentList;
+        private StackPanel _parameterComponentList;
 
-        private void InitializeForm(ParameterCollection parameters) 
+        public ParameterCollectionView() {}
+
+        public ParameterCollectionView(ParameterCollection parameters, ParameterCollectionViewOptions options, IParameterComponentDefinition[] customParameterComponents, IParameterValueConverter[] customConverters)
         {
-            Options.MakeValid();
-            if (parameters != null)
+            _currentParameterCollection = parameters.DeepCopyJson();
+            _options = options;
+            SetCustomParameterComponents(customParameterComponents);
+            _customConverters = customConverters;
+            InitializeForm();
+        }
+
+        private void InitializeForm() 
+        {
+            if (_options == null)
             {
-                foreach (var parameter in parameters) 
+                _options = new ParameterCollectionViewOptions();
+            }
+            _parameterComponentList = new StackPanel();
+            _options.MakeValid();
+            if (_currentParameterCollection != null)
+            {
+                foreach (var parameter in _currentParameterCollection) 
                 {
                     var additionalInfo = parameter.GetAdditionalInfo();
-                    var localOptions = Options;
+                    var localOptions = _options;
                     if (Options.AdditionalInfoWillOverride && additionalInfo != null)
                     {
-                        localOptions = ParameterCollectionViewOptions.CreateFromParameterCollection(additionalInfo, Options);
+                        localOptions = ParameterCollectionViewOptions.CreateFromParameterCollection(additionalInfo, _options);
                         localOptions.MakeValid();
                     }
 
@@ -92,25 +142,34 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
                     {
                         var def = _parameterComponents.First(p => p.ShouldComponentBeUsed(parameter, additionalInfo, localOptions, CustomConverters));
                         var parentType = def.GetHowParameterNameIsShown(parameter, additionalInfo, localOptions, CustomConverters);
-                        var component = def.GetComponent(parameter, parameterText, additionalInfo, localOptions, CustomConverters, CustomParameterComponents, (value, additionalInfo) => ChangeParameter(parameter.Key, value, additionalInfo));
+                        var component = def.GetComponent(parameter, parameterText, additionalInfo, localOptions, CustomConverters, CustomParameterComponents, (value, adInfo) => ChangeParameter(parameter.Key, value, adInfo));
                         if (parentType == ComponentParentType.None)
                         {
-                            parameterComponentList.Children.Add(component);
+                            if (additionalInfo.HasKeyAndCanConvertTo(localOptions.TooltipParameterTextKey, typeof(string))) 
+                            {
+                                ToolTip.SetTip(component, additionalInfo.GetByKey<string>(localOptions.TooltipParameterTextKey));
+                            }
+                            _parameterComponentList.Children.Add(component);
                         }
                         else if (parentType == ComponentParentType.Border || parentType == ComponentParentType.BorderWithoutName)
                         {
-                            var border = new Border();
-                            border.Background = localOptions.BorderOptions.Background;
-                            border.BorderBrush = localOptions.BorderOptions.BorderBrush;
-                            border.BorderThickness = localOptions.BorderOptions.BorderThickness;
-                            border.CornerRadius = localOptions.BorderOptions.CornerRadius;
-                            border.BoxShadow = localOptions.BorderOptions.BoxShadow;
+                            var border = new Border
+                            {
+                                Background = localOptions.BorderOptions.Background,
+                                BorderBrush = localOptions.BorderOptions.BorderBrush,
+                                BorderThickness = localOptions.BorderOptions.BorderThickness,
+                                CornerRadius = localOptions.BorderOptions.CornerRadius,
+                                Margin = localOptions.BorderOptions.Margin,
+                                Padding = localOptions.BorderOptions.Padding,
+                                BoxShadow = localOptions.BorderOptions.BoxShadow
+                            };
 
                             if (parentType == ComponentParentType.Border)
                             {
                                 var stackPanel = new StackPanel();
                                 stackPanel.Children.Add(new TextBlock {
                                     Text = parameterText,
+                                    FontWeight = FontWeight.Bold,
                                 });
                                 stackPanel.Children.Add(component);
                                 border.Child = stackPanel;
@@ -119,21 +178,80 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
                             {
                                 border.Child = component;
                             }
+
+                            if (additionalInfo.HasKeyAndCanConvertTo(localOptions.TooltipParameterTextKey, typeof(string))) 
+                            {
+                                ToolTip.SetTip(border, additionalInfo.GetByKey<string>(localOptions.TooltipParameterTextKey));
+                            }
+
+                            _parameterComponentList.Children.Add(border);
                         }
                         else if (parentType == ComponentParentType.Expander)
                         {
-                            <RadzenFieldset Text="@parameterText" MouseEnter="@(additionalInfo.HasKeyAndCanConvertTo(localOptions.TooltipParameterTextKey, typeof(string)) ? (args) => {tooltipService.Open(args, additionalInfo.GetByKey<string>(localOptions.TooltipParameterTextKey, CustomConverters), localOptions.TooltipOptions);} : null)">
-                                <DynamicComponent Type="@compType" Parameters="@compParameters"></DynamicComponent>
-                            </RadzenFieldset>
+                            var expander = new Expander
+                            {
+                                Background = localOptions.ExpanderOptions.Background,
+                                BorderBrush = localOptions.ExpanderOptions.BorderBrush,
+                                BorderThickness = localOptions.ExpanderOptions.BorderThickness,
+                                CornerRadius = localOptions.ExpanderOptions.CornerRadius,
+                                Margin = localOptions.ExpanderOptions.Margin,
+                                Padding = localOptions.ExpanderOptions.Padding,
+                                ExpandDirection = localOptions.ExpanderOptions.ExpandDirection,
+                                IsExpanded = localOptions.ExpanderOptions.IsExpanded,
+                                Header = new TextBlock {
+                                    Text = parameterText,
+                                    FontWeight = FontWeight.Bold,
+                                },
+                                Content = component
+                            };
+
+                            if (additionalInfo.HasKeyAndCanConvertTo(localOptions.TooltipParameterTextKey, typeof(string))) 
+                            {
+                                ToolTip.SetTip(expander, additionalInfo.GetByKey<string>(localOptions.TooltipParameterTextKey));
+                            }
+                            _parameterComponentList.Children.Add(expander);
                         }
                     }
                 }
+
+                Content = new ScrollViewer 
+                {
+                    Content = _parameterComponentList
+                };
             }
         }
 
-        private ParameterCollection GetParameterCollectionFromForm() 
+        private void ChangeParameter(string parameterKey, object value)
         {
-            return new ParameterCollection();
+            if (_currentParameterCollection.GetParameterByKey(parameterKey).SetValue(value, CustomConverters))
+            {
+                OnValueChanged(_currentParameterCollection, parameterKey);
+            }
+        }
+
+        private void ChangeParameter(string parameterKey, object value, ParameterCollection additionalInfo)
+        {
+            if (additionalInfo == null)
+            {
+                ChangeParameter(parameterKey, value);
+            }
+            else if (_currentParameterCollection.GetParameterByKey(parameterKey).SetValue(value, additionalInfo, CustomConverters))
+            {
+                OnValueChanged(_currentParameterCollection, parameterKey);
+            }
+        }
+
+        private void SetCustomParameterComponents(IParameterComponentDefinition[] value)
+        {
+            _customParameterComponents = value;
+            if (value != null)
+            {
+                _parameterComponents = value.Concat(Extensions.DefaultParameterComponents).ToArray();
+            }
+            else 
+            {
+                _parameterComponents = Extensions.DefaultParameterComponents;
+            }
         }
     }
 }
