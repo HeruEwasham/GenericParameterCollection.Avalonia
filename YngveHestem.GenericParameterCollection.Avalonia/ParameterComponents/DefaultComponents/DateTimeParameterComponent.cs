@@ -9,7 +9,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
     {
         public Control GetComponent(Parameter parameter, string parameterName, ParameterCollection additionalInfo, ParameterCollectionViewOptions options, IParameterValueConverter[] customConverters, IParameterComponentDefinition[] customParameterComponents, Action<object, ParameterCollection> updateParameterValue)
         {
-            var currentValue = parameter.GetValue<DateTime?>();
+            var currentValue = parameter.GetValue<DateTime?>(customConverters);
             var dateControl = new DatePicker
             {
                 IsEnabled = !options.ReadOnly,

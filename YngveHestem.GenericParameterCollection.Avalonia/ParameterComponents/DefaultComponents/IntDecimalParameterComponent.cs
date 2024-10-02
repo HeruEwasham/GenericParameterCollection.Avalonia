@@ -20,6 +20,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
             {
                 control.Increment = options.StepInteger;
                 control.FormatString = options.NumberFormatInt;
+                control.ParsingNumberStyle = System.Globalization.NumberStyles.Integer;
 
                 if (options.IsNullable)
                 {
@@ -50,6 +51,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
             {
                 control.Increment = options.StepDecimal;
                 control.FormatString = options.NumberFormatDecimal;
+                control.ParsingNumberStyle = System.Globalization.NumberStyles.Number;
 
                 if (options.IsNullable)
                 {

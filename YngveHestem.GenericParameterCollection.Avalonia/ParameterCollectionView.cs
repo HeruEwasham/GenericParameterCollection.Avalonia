@@ -3,6 +3,7 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Layout;
 using YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents;
 using YngveHestem.GenericParameterCollection.ParameterValueConverters;
 
@@ -94,7 +95,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
 
         public ParameterCollectionView() {}
 
-        public ParameterCollectionView(ParameterCollection parameters, ParameterCollectionViewOptions options, IParameterComponentDefinition[] customParameterComponents, IParameterValueConverter[] customConverters)
+        public ParameterCollectionView(ParameterCollection parameters, ParameterCollectionViewOptions options = null, IParameterComponentDefinition[] customParameterComponents = null, IParameterValueConverter[] customConverters = null)
         {
             _currentParameterCollection = parameters.DeepCopyJson();
             _options = options;
@@ -198,6 +199,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
                                 Padding = localOptions.ExpanderOptions.Padding,
                                 ExpandDirection = localOptions.ExpanderOptions.ExpandDirection,
                                 IsExpanded = localOptions.ExpanderOptions.IsExpanded,
+                                HorizontalAlignment = HorizontalAlignment.Stretch,
                                 Header = new TextBlock {
                                     Text = parameterText,
                                     FontWeight = FontWeight.Bold,

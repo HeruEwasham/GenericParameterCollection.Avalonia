@@ -17,11 +17,15 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters
 
         public bool CanConvertFromValue(ParameterType targetType, Type sourceType, object value, IEnumerable<IParameterValueConverter> customConverters)
         {
-            return typeof(ISolidColorBrush).IsAssignableFrom(sourceType) && targetType == ParameterType.String;
+            return ((sourceType == typeof(IBrush) && value == null) || typeof(ISolidColorBrush).IsAssignableFrom(sourceType)) && targetType == ParameterType.String;
         }
 
         public object ConvertFromParameter(ParameterType sourceType, Type targetType, JToken rawValue, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
         {
+            if (rawValue == null || rawValue.Type == JTokenType.Null) 
+            {
+                return null;
+            }
             if (!Color.TryParse(rawValue.ToObject<string>(jsonSerializer), out var color))
             {
                 throw new ArgumentException("The value in the parameter could not be converted to a color.");
@@ -32,6 +36,10 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters
 
         public JToken ConvertFromValue(ParameterType targetType, Type sourceType, object value, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
         {
+            if (value == null)
+            {
+                return null;
+            }
             return JToken.FromObject(((ISolidColorBrush)value).Color.ToString(), jsonSerializer);
         }
     }

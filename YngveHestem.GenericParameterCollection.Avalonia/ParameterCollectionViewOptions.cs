@@ -101,6 +101,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
             /// Specifies max number of characters that can be given in a text.
             /// </summary>
             [ParameterProperty("maxChars")]
+            [AdditionalInfo("isNullable", true)]
             public int? MaxNumberOfCharacters = null;
 
             /// <summary>
@@ -113,6 +114,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
             /// Specifies the width of a textarea. Null means that the default length will be used.
             /// </summary>
             [ParameterProperty("textareaWidth")]
+            [AdditionalInfo("isNullable", true)]
             public double? TextAreaWidth = null;
 
             /// <summary>

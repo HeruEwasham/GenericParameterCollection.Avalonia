@@ -21,6 +21,10 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
 
         public object ConvertFromParameter(ParameterType sourceType, Type targetType, JToken rawValue, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
         {
+            if (rawValue == null || rawValue.Type == JTokenType.Null) 
+            {
+                return null;
+            }
             try 
             {
                 return BoxShadows.Parse(rawValue.ToObject<string>(jsonSerializer));
@@ -33,6 +37,10 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
 
         public JToken ConvertFromValue(ParameterType targetType, Type sourceType, object value, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
         {
+            if (value == null)
+            {
+                return null;
+            }
             return JToken.FromObject(((BoxShadows)value).ToString(), jsonSerializer);
         }
     }

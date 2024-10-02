@@ -13,7 +13,10 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
             new IntDecimalParameterComponent(),
             new BytesParameterComponent(),
             new BoolParameterComponent(),
-            new DateTimeParameterComponent()
+            new DateTimeParameterComponent(),
+            new ParameterCollectionViewParameterComponent(),
+            new EnumSelectOneParameterComponent(),
+            new SelectManyParameterComponent()
         };
         
 		public static ParameterCollection DeepCopyJson(this ParameterCollection parameters)

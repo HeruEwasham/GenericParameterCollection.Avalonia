@@ -155,11 +155,11 @@ public partial class MainWindow : Window
                         { "Comment", string.Empty }
                     }
                 },
-                { "parametersIf:Checkbox:name", "I do wonder..." },
+                { "parametersIf:Border:name", "I do wonder..." },
                 { "parentTypeWhenHavingExtraParameters", ExtraParametersParentType.ExpanderOnOnlyCollection },
                 { "prettyValues", new ParameterCollection 
                     {
-                        { "Checkbox", "The old checkbox" }
+                        { "Border", "The nice border" }
                     }
                 }
             }
@@ -284,7 +284,7 @@ public partial class MainWindow : Window
 
     private ParameterCollectionViewOptions _options = new ParameterCollectionViewOptions
     {
-        PlaceholderText = "This is a placeholder text.",
+        PlaceholderText = "This is a placeholder text."
     };
 
     public MainWindow()
@@ -293,7 +293,7 @@ public partial class MainWindow : Window
         { 
             AcceptsReturn = true,
             IsReadOnly = true,
-            Text = _parameters.ToString(),
+            Text = _parameters.ToJson(Newtonsoft.Json.Formatting.Indented),
             Height = 300
         };
         _debugWindow = new TextBox 
@@ -303,7 +303,7 @@ public partial class MainWindow : Window
             Text = "Debug window ready",
             Height = 100
         };
-        _parameterCollectionView = new ParameterCollectionView(_parameters, _options, null, null)
+        _parameterCollectionView = new ParameterCollectionView(_parameters, _options)
         {
             Height = 500
         };
@@ -313,12 +313,26 @@ public partial class MainWindow : Window
         stackPanel.Children.Add(_parameterCollectionView);
         stackPanel.Children.Add(_currentParameterCollectionAsText);
         stackPanel.Children.Add(_debugWindow);
-        Content = stackPanel;
+
+        var optionsArea = new ParameterCollectionView(ParameterCollection.FromObject(_options, ParameterCollectionViewOptions.OptionsParameterConverters));
+        optionsArea.ValueChanged += (sender, e) =>
+        {
+            _parameterCollectionView.Options = e.NewParameterCollection.ToObject<ParameterCollectionViewOptions>(ParameterCollectionViewOptions.OptionsParameterConverters);
+        };
+        var splitView = new SplitView
+        {
+            IsPaneOpen = true,
+            DisplayMode = SplitViewDisplayMode.Inline,
+            Pane = optionsArea,
+            Content = stackPanel
+        };
+        
+        Content = splitView;
     }
 
     private void _parameterCollectionView_ValueChanged(object? sender, ParameterCollectionViewOnChangeEventArgs e)
     {
-        _currentParameterCollectionAsText.Text = e.NewParameterCollection.ToString();
+        _currentParameterCollectionAsText.Text = e.NewParameterCollection.ToJson(Newtonsoft.Json.Formatting.Indented);
         _debugWindow.Text += Environment.NewLine + "New event: " + e.ParameterKey + " changed.";
     }
 }
