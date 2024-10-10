@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -27,7 +28,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
             return parameter.Type == ParameterType.SelectMany;
         }
 
-        public static void UpdateControl(StackPanel stackPanel, Parameter parameter, string parameterName, ParameterCollection additionalInfo, ParameterCollectionViewOptions options, IParameterValueConverter[] customConverters, IParameterComponentDefinition[] customParameterComponents, Action<object, ParameterCollection> updateParameterValue) 
+        private static void UpdateControl(StackPanel stackPanel, Parameter parameter, string parameterName, ParameterCollection additionalInfo, ParameterCollectionViewOptions options, IParameterValueConverter[] customConverters, IParameterComponentDefinition[] customParameterComponents, Action<object, ParameterCollection> updateParameterValue) 
         {
             stackPanel.Children.Clear();
             var border = new Border
@@ -42,9 +43,11 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
             };
             var listBox = new ListBox 
             {
-                SelectionMode = SelectionMode.Multiple,
+                SelectionMode = SelectionMode.Multiple | SelectionMode.Toggle,
                 IsEnabled = !options.ReadOnly
             };
+            AutomationProperties.SetName(listBox, parameterName);
+            AutomationProperties.SetName(border, parameterName);
             foreach(var item in MakePretty(parameter.GetChoices(), additionalInfo)) 
             {
                 listBox.Items.Add(item);
@@ -109,45 +112,133 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 {
                     stackPanelInBorder.Children.Add(listBox);
                     stackPanel.Children.Add(border);
-                    foreach (var item in extraParameters)
+                    if (options.SelectManyExtraParametersGetOwnParent)
                     {
-                        stackPanel.Children.Add(item.Value);
+                        foreach (var item in extraParameters)
+                        {
+                            var expander = new Expander
+                            {
+                                Background = extraParametersOptions[item.Key].ExpanderOptions.Background,
+                                BorderBrush = extraParametersOptions[item.Key].ExpanderOptions.BorderBrush,
+                                BorderThickness = extraParametersOptions[item.Key].ExpanderOptions.BorderThickness,
+                                CornerRadius = extraParametersOptions[item.Key].ExpanderOptions.CornerRadius,
+                                Margin = extraParametersOptions[item.Key].ExpanderOptions.Margin,
+                                Padding = extraParametersOptions[item.Key].ExpanderOptions.Padding,
+                                ExpandDirection = extraParametersOptions[item.Key].ExpanderOptions.ExpandDirection,
+                                IsExpanded = extraParametersOptions[item.Key].ExpanderOptions.IsExpanded,
+                                HorizontalAlignment = HorizontalAlignment.Stretch,
+                                Header = new TextBlock {
+                                    Text = extraParametersNames[item.Key],
+                                    FontWeight = FontWeight.Bold,
+                                },
+                                Content = item.Value
+                            };
+                            AutomationProperties.SetName(expander, extraParametersNames[item.Key]);
+                            stackPanel.Children.Add(expander);
+                        }
+                    }
+                    else 
+                    {
+                        foreach (var item in extraParameters)
+                        {
+                            stackPanel.Children.Add(item.Value);
+                        }
                     }
                 }
                 else if (options.ParentTypeWhenHavingExtraParameters == ExtraParametersParentType.ExpanderOnOnlyCollection)
                 {
                     stackPanelInBorder.Children.Add(listBox);
                     stackPanel.Children.Add(border);
-                    foreach (var item in extraParameters)
+                    var stackPanelInParentExpander = new StackPanel();
+                    var expander = new Expander
                     {
-                        stackPanel.Children.Add(new Expander
+                        Background = options.ExpanderOptions.Background,
+                        BorderBrush = options.ExpanderOptions.BorderBrush,
+                        BorderThickness = options.ExpanderOptions.BorderThickness,
+                        CornerRadius = options.ExpanderOptions.CornerRadius,
+                        Margin = options.ExpanderOptions.Margin,
+                        Padding = options.ExpanderOptions.Padding,
+                        ExpandDirection = options.ExpanderOptions.ExpandDirection,
+                        IsExpanded = options.ExpanderOptions.IsExpanded,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        Header = new TextBlock {
+                            Text = string.Format(options.SelectManyExtraParametersName, parameterName),
+                            FontWeight = FontWeight.Bold,
+                        },
+                        Content = stackPanelInParentExpander
+                    };
+                    AutomationProperties.SetName(expander, string.Format(options.SelectManyExtraParametersName, parameterName));
+                    if (options.SelectManyExtraParametersGetOwnParent)
+                    {
+                        foreach (var item in extraParameters)
                         {
-                            Background = extraParametersOptions[item.Key].ExpanderOptions.Background,
-                            BorderBrush = extraParametersOptions[item.Key].ExpanderOptions.BorderBrush,
-                            BorderThickness = extraParametersOptions[item.Key].ExpanderOptions.BorderThickness,
-                            CornerRadius = extraParametersOptions[item.Key].ExpanderOptions.CornerRadius,
-                            Margin = extraParametersOptions[item.Key].ExpanderOptions.Margin,
-                            Padding = extraParametersOptions[item.Key].ExpanderOptions.Padding,
-                            ExpandDirection = extraParametersOptions[item.Key].ExpanderOptions.ExpandDirection,
-                            IsExpanded = extraParametersOptions[item.Key].ExpanderOptions.IsExpanded,
-                            HorizontalAlignment = HorizontalAlignment.Stretch,
-                            Header = new TextBlock {
-                                Text = extraParametersNames[item.Key],
-                                FontWeight = FontWeight.Bold,
-                            },
-                            Content = extraParameters
-                        });
+                            var childExpander = new Expander
+                            {
+                                Background = extraParametersOptions[item.Key].ExpanderOptions.Background,
+                                BorderBrush = extraParametersOptions[item.Key].ExpanderOptions.BorderBrush,
+                                BorderThickness = extraParametersOptions[item.Key].ExpanderOptions.BorderThickness,
+                                CornerRadius = extraParametersOptions[item.Key].ExpanderOptions.CornerRadius,
+                                Margin = extraParametersOptions[item.Key].ExpanderOptions.Margin,
+                                Padding = extraParametersOptions[item.Key].ExpanderOptions.Padding,
+                                ExpandDirection = extraParametersOptions[item.Key].ExpanderOptions.ExpandDirection,
+                                IsExpanded = extraParametersOptions[item.Key].ExpanderOptions.IsExpanded,
+                                HorizontalAlignment = HorizontalAlignment.Stretch,
+                                Header = new TextBlock {
+                                    Text = extraParametersNames[item.Key],
+                                    FontWeight = FontWeight.Bold,
+                                },
+                                Content = item.Value
+                            };
+                            AutomationProperties.SetName(childExpander,extraParametersNames[item.Key]);
+                            stackPanelInParentExpander.Children.Add(childExpander);
+                        }
                     }
+                    else 
+                    {
+                        foreach (var item in extraParameters)
+                        {
+                            stackPanelInParentExpander.Children.Add(item.Value);
+                        }
+                    }
+                    stackPanel.Children.Add(expander);
                 }
                 else if (options.ParentTypeWhenHavingExtraParameters == ExtraParametersParentType.ExpanderOverWholeParameter)
                 {
                     var contentStackPanel = new StackPanel();
                     contentStackPanel.Children.Add(listBox);
-                    foreach (var item in extraParameters)
+                    if (options.SelectManyExtraParametersGetOwnParent)
                     {
-                        contentStackPanel.Children.Add(item.Value);
+                        foreach (var item in extraParameters)
+                        {
+                            var childExpander = new Expander
+                            {
+                                Background = extraParametersOptions[item.Key].ExpanderOptions.Background,
+                                BorderBrush = extraParametersOptions[item.Key].ExpanderOptions.BorderBrush,
+                                BorderThickness = extraParametersOptions[item.Key].ExpanderOptions.BorderThickness,
+                                CornerRadius = extraParametersOptions[item.Key].ExpanderOptions.CornerRadius,
+                                Margin = extraParametersOptions[item.Key].ExpanderOptions.Margin,
+                                Padding = extraParametersOptions[item.Key].ExpanderOptions.Padding,
+                                ExpandDirection = extraParametersOptions[item.Key].ExpanderOptions.ExpandDirection,
+                                IsExpanded = extraParametersOptions[item.Key].ExpanderOptions.IsExpanded,
+                                HorizontalAlignment = HorizontalAlignment.Stretch,
+                                Header = new TextBlock {
+                                    Text = extraParametersNames[item.Key],
+                                    FontWeight = FontWeight.Bold,
+                                },
+                                Content = item.Value
+                            };
+                            AutomationProperties.SetName(childExpander, extraParametersNames[item.Key]);
+                            contentStackPanel.Children.Add(childExpander);
+                        }
                     }
-                    stackPanel.Children.Add(new Expander
+                    else 
+                    {
+                        foreach (var item in extraParameters)
+                        {
+                            contentStackPanel.Children.Add(item.Value);
+                        }
+                    }
+                    var expander = new Expander
                     {
                         Background = options.ExpanderOptions.Background,
                         BorderBrush = options.ExpanderOptions.BorderBrush,
@@ -163,7 +254,9 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                             FontWeight = FontWeight.Bold,
                         },
                         Content = contentStackPanel
-                    });
+                    };
+                    AutomationProperties.SetName(expander, parameterName);
+                    stackPanel.Children.Add(expander);
                 }
             }
             else 

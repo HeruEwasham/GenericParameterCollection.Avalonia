@@ -9,12 +9,14 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
         /// Which direction the expanding should be done at.
         /// </summary>
         [ParameterProperty("expandDirection")]
+        [AdditionalInfo("tooltip", "Which direction the expanding should be done at.")]
         public ExpandDirection ExpandDirection = ExpandDirection.Down;
 
         /// <summary>
         /// Should the expandable be expanded or not when rendering.
         /// </summary>
         [ParameterProperty("isExpanded")]
+        [AdditionalInfo("tooltip", "Should the expandable be expanded or not when rendering.")]
         public bool IsExpanded = true;
 
         public override void UpdateFromParameterCollection(ParameterCollection parameters)

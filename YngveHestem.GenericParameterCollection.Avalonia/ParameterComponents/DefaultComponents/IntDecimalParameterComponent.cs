@@ -24,14 +24,14 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
 
                 if (options.IsNullable)
                 {
-                    control.Value = parameter.GetValue<int?>(customConverters);
-                    control.ValueChanged += (sender, e) => updateParameterValue((int?)e.NewValue, null);
+                    control.Value = parameter.GetValue<long?>(customConverters);
+                    control.ValueChanged += (sender, e) => updateParameterValue((long?)e.NewValue, null);
                 }
                 else
                 {
                     if (parameter.HasValue()) 
                     {
-                        control.Value = parameter.GetValue<int>(customConverters);
+                        control.Value = parameter.GetValue<long>(customConverters);
                     }
                     else 
                     {
@@ -42,7 +42,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                     {
                         if (e.NewValue.HasValue)
                         {
-                            updateParameterValue((int)e.NewValue.Value, null);
+                            updateParameterValue((long)e.NewValue.Value, null);
                         }
                     };
                 }

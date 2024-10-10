@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -43,6 +44,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
             {
                 IsEnabled = !options.ReadOnly
             };
+            AutomationProperties.SetName(comboBox, parameterName);
+            AutomationProperties.SetName(border, parameterName);
             foreach(var item in MakePretty(parameter.GetChoices(), additionalInfo)) 
             {
                 comboBox.Items.Add(item);
@@ -110,7 +113,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                     stackPanel.Children.Add(border);
                     if (extraParameters != null)
                     {
-                        stackPanel.Children.Add(new Expander
+                        var expander = new Expander
                         {
                             Background = localOptions.ExpanderOptions.Background,
                             BorderBrush = localOptions.ExpanderOptions.BorderBrush,
@@ -126,7 +129,9 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                                 FontWeight = FontWeight.Bold,
                             },
                             Content = extraParameters
-                        });
+                        };
+                        AutomationProperties.SetName(expander, extraParametersName);
+                        stackPanel.Children.Add(expander);
                     }
                 }
                 else if (options.ParentTypeWhenHavingExtraParameters == ExtraParametersParentType.ExpanderOverWholeParameter)
@@ -137,7 +142,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                     {
                         contentStackPanel.Children.Add(extraParameters);
                     }
-                    stackPanel.Children.Add(new Expander
+                    var expander = new Expander
                     {
                         Background = localOptions.ExpanderOptions.Background,
                         BorderBrush = localOptions.ExpanderOptions.BorderBrush,
@@ -153,7 +158,9 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                             FontWeight = FontWeight.Bold,
                         },
                         Content = contentStackPanel
-                    });
+                    };
+                    AutomationProperties.SetName(expander, parameterName);
+                    stackPanel.Children.Add(expander);
                 }
             }
             else 

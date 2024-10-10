@@ -1,4 +1,5 @@
 ﻿using System;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -11,7 +12,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
         public Control GetComponent(Parameter parameter, string parameterName, ParameterCollection additionalInfo, ParameterCollectionViewOptions options, IParameterValueConverter[] customConverters, IParameterComponentDefinition[] customParameterComponents, Action<object, ParameterCollection> updateParameterValue)
         {
             var stackPanel = new StackPanel();
-            UpdateControl(stackPanel, parameter, parameterName, additionalInfo, options, customConverters, customParameterComponents, updateParameterValue);
+            UpdateControl(stackPanel, parameter.GetValue<bool?>(customConverters), parameter.Type, parameterName, additionalInfo, options, customConverters, customParameterComponents, updateParameterValue);
             return stackPanel;
         }
 
@@ -25,7 +26,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
             return parameter.Type == ParameterType.Bool;
         }
 
-        public static void UpdateControl(StackPanel stackPanel, Parameter parameter, string parameterName, ParameterCollection additionalInfo, ParameterCollectionViewOptions options, IParameterValueConverter[] customConverters, IParameterComponentDefinition[] customParameterComponents, Action<object, ParameterCollection> updateParameterValue) 
+        public static void UpdateControl(StackPanel stackPanel, bool? value, ParameterType parameterType, string parameterName, ParameterCollection additionalInfo, ParameterCollectionViewOptions options, IParameterValueConverter[] customConverters, IParameterComponentDefinition[] customParameterComponents, Action<object, ParameterCollection> updateParameterValue) 
         {
             stackPanel.Children.Clear();
             var border = new Border
@@ -41,9 +42,11 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
             var checkBox = new CheckBox 
             {
                 IsThreeState = options.IsNullable,
-                IsChecked = parameter.GetValue<bool?>(customConverters),
+                IsChecked = value,
                 IsEnabled = !options.ReadOnly
             };
+            AutomationProperties.SetName(checkBox, parameterName);
+            AutomationProperties.SetName(border, parameterName);
 
             var stackPanelInBorder = new StackPanel();
             stackPanelInBorder.Children.Add(new TextBlock {
@@ -58,7 +61,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 checkBox.IsCheckedChanged += (sender, args) => 
                 {
                     updateParameterValue(((CheckBox)sender).IsChecked, null);
-                    UpdateControl(stackPanel, parameter, parameterName, additionalInfo, options, customConverters, customParameterComponents, updateParameterValue);
+                    UpdateControl(stackPanel, ((CheckBox)sender).IsChecked, parameterType, parameterName, additionalInfo, options, customConverters, customParameterComponents, updateParameterValue);
                 };
                 ParameterCollectionView extraParameters = null;
                 var localOptions = options;
@@ -105,11 +108,12 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 }
                 else if (options.ParentTypeWhenHavingExtraParameters == ExtraParametersParentType.ExpanderOnOnlyCollection)
                 {
+                    AutomationProperties.SetName(border, parameterName);
                     stackPanelInBorder.Children.Add(checkBox);
                     stackPanel.Children.Add(border);
                     if (extraParameters != null)
                     {
-                        stackPanel.Children.Add(new Expander
+                        var expander = new Expander
                         {
                             Background = localOptions.ExpanderOptions.Background,
                             BorderBrush = localOptions.ExpanderOptions.BorderBrush,
@@ -125,7 +129,9 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                                 FontWeight = FontWeight.Bold,
                             },
                             Content = extraParameters
-                        });
+                        };
+                        AutomationProperties.SetName(expander, extraParametersName);
+                        stackPanel.Children.Add(expander);
                     }
                 }
                 else if (options.ParentTypeWhenHavingExtraParameters == ExtraParametersParentType.ExpanderOverWholeParameter)
@@ -136,7 +142,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                     {
                         contentStackPanel.Children.Add(extraParameters);
                     }
-                    stackPanel.Children.Add(new Expander
+                    var expander = new Expander
                     {
                         Background = localOptions.ExpanderOptions.Background,
                         BorderBrush = localOptions.ExpanderOptions.BorderBrush,
@@ -152,7 +158,9 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                             FontWeight = FontWeight.Bold,
                         },
                         Content = contentStackPanel
-                    });
+                    };
+                    AutomationProperties.SetName(expander, parameterName);
+                    stackPanel.Children.Add(expander);
                 }
             }
             else 

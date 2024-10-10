@@ -30,7 +30,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents
         Control GetComponent(Parameter parameter, string parameterName, ParameterCollection additionalInfo, ParameterCollectionViewOptions options, IParameterValueConverter[] customConverters, IParameterComponentDefinition[] customParameterComponents, Action<object, ParameterCollection> updateParameterValue);
 
         /// <summary>
-        /// Here you can return how the parameter name should be shown (None, RadzenFormField or RadzenFieldset).
+        /// Here you can return how the parameter name should be shown.
         /// Be aware that if you select None, this means that the paramater will not show any naming-overlay for the parameter. If this then is wanted to be shown (often advised), the component need to show this in some way.
         /// </summary>
         /// <param name="parameter"></param>

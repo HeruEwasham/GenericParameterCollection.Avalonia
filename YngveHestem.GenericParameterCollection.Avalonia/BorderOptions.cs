@@ -9,6 +9,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
         /// Specifies if and how the box shadow will be shown.
         /// </summary>
         [ParameterProperty("boxShadow")]
+        [AdditionalInfo("tooltip", "Specifies if and how the box shadow will be shown.")]
         public BoxShadows BoxShadow = new BoxShadows(); // Will be no shadow according to parse-method by 2024-09-14.
 
         public override void UpdateFromParameterCollection(ParameterCollection parameters)

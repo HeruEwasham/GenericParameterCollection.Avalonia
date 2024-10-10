@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents;
 using YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.DefaultComponents;
 
 namespace YngveHestem.GenericParameterCollection.Avalonia
 {
-    public static class Extensions
+    internal static class Extensions
     {
         internal static IParameterComponentDefinition[] DefaultParameterComponents = new IParameterComponentDefinition[] 
         {
@@ -16,7 +17,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
             new DateTimeParameterComponent(),
             new ParameterCollectionViewParameterComponent(),
             new EnumSelectOneParameterComponent(),
-            new SelectManyParameterComponent()
+            new SelectManyParameterComponent(),
+            new IEnumerablesParameterComponent()
         };
         
 		public static ParameterCollection DeepCopyJson(this ParameterCollection parameters)

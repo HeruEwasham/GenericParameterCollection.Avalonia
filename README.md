@@ -83,8 +83,8 @@ If you define this in a ParameterCollection-ParameterType, the changes will affe
 | FilePreviewHeight | previewHeight | int | Specifies the height of the file preview. | 300 |
 | FilePreviewWidth | previewWidth | int | Specifies the width of the file preview. | 500 |
 | FileTypeMappings |  | FileType[] | List of different file types and mappings between extensions, UTType (UTI) and mime-types. All file extensions in SupportedFileExtensions must be defined here to be supported. | Default value is all the values that is defined in the library used. Check for yourself if you need to add your own values. |
-| MinDate | minDate | DateTime | The earliest date that is possible to pick. | DateTime.Today.AddYears(-1000) |
-| MaxDate | maxDate | DateTime | The latest date that is possible to pick. | DateTime.Today.AddYears(1000) |
+| MinDate | minDate | DateTime | The earliest date that is possible to pick. | DateTime.MinValue.Add(TimeSpan.FromHours(12)); |
+| MaxDate | maxDate | DateTime | The latest date that is possible to pick. | DateTime.MaxValue.Add(TimeSpan.FromHours(-12)); |
 | DateFormatDay | dateFormatDay | string | Specifies how the format of the day is on Date and DateTime-parameters. | dd |
 | DateFormatMonth | dateFormatMonth | string | Specifies how the format of the month is on Date and DateTime-parameters. | MMMM |
 | DateFormatYear | dateFormatYear | string | Specifies how the format of the year is on Date and DateTime-parameters. | yyyy |
@@ -109,7 +109,7 @@ If you define this in a ParameterCollection-ParameterType, the changes will affe
 | | parametersIf:VALUE | ParameterCollection | Any parameters specified here in an Enum-, SelectOne or SelectMany-parameter will be shown and be editable (if not set to readonly), if the value is set to the value specified as VALUE. Remember that VALUE-part of the name need to be exactly as the value (including uppercase/lowercase, etc.) | |
 | | parametersIf:VALUE:name | string | Specifies the text used on the the collection of extra parameters if value is VALUE (not all ParentTypeWhenHavingExtraParameters-options use it). If set, this will be used instead of ExtraParametersName. | |
 | | parametersIf:VALUE:options | ParameterCollection | Any parameters specified here that corresponds to the given parameter name for an option in the option-class, will alter the options inputted to the shown ParameterCollection (the same way that adding parameter to a parameters AdditionalInfo). | |
-| SelectManyExtraParametersGetOwnParent | selectManyExtraParametersGetOwnParent | bool | Should each extra parameter-collection (one for each value that has one), get it's own visible parent (RadzenFieldset). ExtraParametersParentType will here decide if all the given collections should have one too or not. | true |
+| SelectManyExtraParametersGetOwnParent | selectManyExtraParametersGetOwnParent | bool | Should each extra parameter-collection (one for each value that has one), get it's own visible parent. | true |
 | SelectManyExtraParametersName | selectManyExtraParametersName | string | Specifies the text used on the the total collection of extra parameters for SelectMany-parameters (not all ParentTypeWhenHavingExtraParameters-options use it). You can use {0} to get the parameterName of the main parameter. | Extra parameters when {0} has theese values |
 | | prettyValues | ParameterCollection | Let you change the values shown to the user on Enum-, SelectOne- and SelectMany-parameter to something other. The value gotten back and sent in must be the correct value. This can be useful if you want to support multiple languages or if you just want to show prettier enum-values to the user. | |
 | IsNullable | isNullable | bool | Should the controls that support it allow setting a value to null or not. | false |
@@ -121,3 +121,4 @@ If you define this in a ParameterCollection-ParameterType, the changes will affe
 | NoBytesSelectedText | noBytesSelectedText | string | What should the text be when no file are selected. | No file selected. |
 | MaxFileSizeErrorText | maxFileSizeErrorText | string | What should the text be when the file to be selected was bigger than MaxFileSize. {0} inserts the filename. {1} inserts the size of the file formatted in a readable size. {2} inserts the MaxFileSize in a readdable size. | File \"{0}\" has size {1}. But we only allows files up to {2}. |
 | SetToNullButtonText | setToNullButtonText | string | The text to display on the button to set a value to null. The button is used on some controls, when isNullable is set, that do not handle setting a value to null another way. | Set to null |
+| ValueCanNotBeConvertedToStringText | valueCanNotBeConvertedToStringText | string | The text to use as a replacement for value, if it is not possible to convert the value to string. This is for instance used on the aria-helptext if the given value can not be converted to string. | Value is not easy to read as a single string. |

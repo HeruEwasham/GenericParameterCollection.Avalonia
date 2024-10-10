@@ -110,7 +110,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                     }
                 };
                 
-                var stackPanel = new StackPanel
+                var stackPanel = new WrapPanel
                 {
                     Orientation = Orientation.Horizontal
                 };

@@ -6,6 +6,7 @@ using Avalonia.Media;
 using Avalonia.Layout;
 using YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents;
 using YngveHestem.GenericParameterCollection.ParameterValueConverters;
+using Avalonia.Automation;
 
 namespace YngveHestem.GenericParameterCollection.Avalonia
 {
@@ -150,6 +151,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
                             {
                                 ToolTip.SetTip(component, additionalInfo.GetByKey<string>(localOptions.TooltipParameterTextKey));
                             }
+                            AutomationProperties.SetName(component, parameterText);
                             _parameterComponentList.Children.Add(component);
                         }
                         else if (parentType == ComponentParentType.Border || parentType == ComponentParentType.BorderWithoutName)
