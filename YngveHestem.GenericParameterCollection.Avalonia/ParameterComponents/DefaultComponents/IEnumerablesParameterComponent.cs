@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Layout;
+using Avalonia.Media;
 using YngveHestem.GenericParameterCollection.ParameterValueConverters;
 
 namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.DefaultComponents
@@ -38,24 +40,138 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
         {
             stackPanel.Children.Clear();
             var componentsList = GetComponentList(customParameterComponents);
-            List<object> itemValues;
-            foreach(var item in GetListItemsAsParameters(parameter, additionalInfo, customConverters, out itemValues))
+            foreach(var item in GetListItemsAsParameters(parameter, additionalInfo, customConverters))
             {
                 var itemControlDef = componentsList.First(p => p.ShouldComponentBeUsed(item, additionalInfo, options, customConverters));
                 var parentType = itemControlDef.GetHowParameterNameIsShown(parameter, additionalInfo, options, customConverters);
-                var component = itemControlDef.GetComponent(item, parameterName + " " + item.Key, additionalInfo, options, customConverters, customParameterComponents, (value, adInfo) => 
-                {
-                    var keyAsInt = int.Parse(item.Key);
-                    if (itemValues.Count > keyAsInt) {
-                        itemValues[keyAsInt] = value;
-                        updateParameterValue(itemValues, adInfo); // TODO: Rewrite so itemValues are the correct type all the time (no conversions each time it is an update)
-                    }
-                });
                 var componentArea = new StackPanel
                 {
                     Orientation = Orientation.Horizontal
                 };
-                componentArea.Children.Add(component);
+                if (parentType == ComponentParentType.None)
+                {
+                    var component = itemControlDef.GetComponent(item, string.Format(options.IEnumerableSingleItemName, parameterName, item.Key), additionalInfo, options, customConverters, customParameterComponents, (value, adInfo) => 
+                    {
+                        var valueListType = typeof(List<>).MakeGenericType(new[] { value.GetType() });
+                        var itemValues = (IList)parameter.GetValue(valueListType, customConverters);
+                        var keyAsInt = int.Parse(item.Key) - 1;
+                        if (itemValues.Count > keyAsInt) {
+                            itemValues[keyAsInt] = value;
+                            updateParameterValue(itemValues, adInfo);
+                        }
+                    });
+                    AutomationProperties.SetName(component, string.Format(options.IEnumerableSingleItemName, parameterName, item.Key));
+                    componentArea.Children.Add(component);
+                }
+                else if (parentType == ComponentParentType.Border || parentType == ComponentParentType.BorderWithoutName)
+                {
+                    var component = itemControlDef.GetComponent(item, string.Format(options.IEnumerableSingleItemName, parameterName, item.Key), additionalInfo, options, customConverters, customParameterComponents, (value, adInfo) => 
+                    {
+                        var valueListType = typeof(List<>).MakeGenericType(new[] { value.GetType() });
+                        var itemValues = (IList)parameter.GetValue(valueListType, customConverters);
+                        var keyAsInt = int.Parse(item.Key) - 1;
+                        if (itemValues.Count > keyAsInt) {
+                            itemValues[keyAsInt] = value;
+                            updateParameterValue(itemValues, adInfo);
+                        }
+                    });
+                    AutomationProperties.SetName(component, string.Format(options.IEnumerableSingleItemName, parameterName, item.Key));
+                    var border = new Border
+                    {
+                        Background = options.BorderOptions.Background,
+                        BorderBrush = options.BorderOptions.BorderBrush,
+                        BorderThickness = options.BorderOptions.BorderThickness,
+                        CornerRadius = options.BorderOptions.CornerRadius,
+                        Margin = options.BorderOptions.Margin,
+                        Padding = options.BorderOptions.Padding,
+                        BoxShadow = options.BorderOptions.BoxShadow,
+                        Child = component
+                    };
+                    componentArea.Children.Add(border);
+                }
+                else if (parentType == ComponentParentType.Expander)
+                {
+                    var expander = new Expander
+                    {
+                        Background = options.ExpanderOptions.Background,
+                        BorderBrush = options.ExpanderOptions.BorderBrush,
+                        BorderThickness = options.ExpanderOptions.BorderThickness,
+                        CornerRadius = options.ExpanderOptions.CornerRadius,
+                        Margin = options.ExpanderOptions.Margin,
+                        Padding = options.ExpanderOptions.Padding,
+                        ExpandDirection = options.ExpanderOptions.ExpandDirection,
+                        IsExpanded = options.ExpanderOptions.IsExpanded,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
+                        Header = new TextBlock {
+                            Text = string.Format(options.IEnumerableSingleItemName, parameterName, item.Key),
+                            FontWeight = FontWeight.Bold,
+                        }
+                    };
+                    if (!options.ExpanderOptions.LoadContentOnlyWhenExpanding)
+                    {
+                        var component = itemControlDef.GetComponent(item, string.Format(options.IEnumerableSingleItemName, parameterName, item.Key), additionalInfo, options, customConverters, customParameterComponents, (value, adInfo) => 
+                        {
+                            var valueListType = typeof(List<>).MakeGenericType(new[] { value.GetType() });
+                            var itemValues = (IList)parameter.GetValue(valueListType, customConverters);
+                            var keyAsInt = int.Parse(item.Key) - 1;
+                            if (itemValues.Count > keyAsInt) {
+                                itemValues[keyAsInt] = value;
+                                updateParameterValue(itemValues, adInfo);
+                            }
+                        });
+                        AutomationProperties.SetName(component, string.Format(options.IEnumerableSingleItemName, parameterName, item.Key));
+                        expander.Content = component;
+                    }
+                    else
+                    {
+                        expander.Expanding += (s, e) =>
+                        {
+                            var exp = (Expander)s;
+                            if (exp.Content == null)
+                            {
+                                var component = itemControlDef.GetComponent(item, string.Format(options.IEnumerableSingleItemName, parameterName, item.Key), additionalInfo, options, customConverters, customParameterComponents, (value, adInfo) => 
+                                {
+                                    var valueListType = typeof(List<>).MakeGenericType(new[] { value.GetType() });
+                                    var itemValues = (IList)parameter.GetValue(valueListType, customConverters);
+                                    var keyAsInt = int.Parse(item.Key) - 1;
+                                    if (itemValues.Count > keyAsInt) {
+                                        itemValues[keyAsInt] = value;
+                                        updateParameterValue(itemValues, adInfo);
+                                    }
+                                });
+                                AutomationProperties.SetName(component, string.Format(options.IEnumerableSingleItemName, parameterName, item.Key));
+                                exp.Content = component;
+                            }
+                        };
+
+                        if (options.ExpanderOptions.UnloadContentWhenCollapsed)
+                        {
+                            expander.Collapsed += (s, e) =>
+                            {
+                                ((Expander)s).Content = null;
+                                GC.Collect();
+                                GC.WaitForPendingFinalizers();
+                            };
+                        }
+                        
+                        if (expander.IsExpanded && expander.Content == null)
+                        {
+                            var component = itemControlDef.GetComponent(item, string.Format(options.IEnumerableSingleItemName, parameterName, item.Key), additionalInfo, options, customConverters, customParameterComponents, (value, adInfo) => 
+                            {
+                                var valueListType = typeof(List<>).MakeGenericType(new[] { value.GetType() });
+                                var itemValues = (IList)parameter.GetValue(valueListType, customConverters);
+                                var keyAsInt = int.Parse(item.Key) - 1;
+                                if (itemValues.Count > keyAsInt) {
+                                    itemValues[keyAsInt] = value;
+                                    updateParameterValue(itemValues, adInfo);
+                                }
+                            });
+                            AutomationProperties.SetName(component, string.Format(options.IEnumerableSingleItemName, parameterName, item.Key));
+                            expander.Content = component;
+                        }
+                    }
+                    componentArea.Children.Add(expander);
+                }
                 if (!options.ReadOnly)
                 {
                     var deleteButton = new Button
@@ -64,7 +180,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                     };
                     deleteButton.Click += (sender, e) => 
                     {
-                        var keyAsInt = int.Parse(item.Key);
+                        var itemValues = (IList)parameter.GetValue(ToType(parameter.Type), customConverters);
+                        var keyAsInt = int.Parse(item.Key) - 1;
                         if (itemValues.Count > keyAsInt) {
                             itemValues.RemoveAt(keyAsInt);
                             updateParameterValue(itemValues, null);
@@ -90,6 +207,11 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 };
                 addButton.Click += (sender, e) =>
                 {
+                    var itemValues = (IList)parameter.GetValue(ToType(parameter.Type), customConverters);
+                    if (itemValues == null)
+                    {
+                        itemValues = (IList)Activator.CreateInstance(ToType(parameter.Type));
+                    }
                     itemValues.Add(GetDefaultValue(parameter, additionalInfo, options, customConverters));
                     updateParameterValue(itemValues, null);
                     UpdateControl(stackPanel, parameter, parameterName, additionalInfo, options, customConverters, customParameterComponents, updateParameterValue);
@@ -176,7 +298,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                     return DateTime.Now;
                 }
             }
-            else if (parameter.Type == ParameterType.ParameterCollection)
+            else if (parameter.Type == ParameterType.ParameterCollection_IEnumerable)
             {
                 if (additionalInfo.HasKeyAndCanConvertTo("defaultValue", typeof(ParameterCollection), customConverters))
                 {
@@ -184,14 +306,14 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 }
                 else
                 {
-                    return null;
+                    return new ParameterCollection();
                 }
             }
             
             throw new NotSupportedException("We don't support " + parameter.Type + " as an IEnumerable.");
         }
 
-        private static IEnumerable<Parameter> GetListItemsAsParameters(Parameter parameter, ParameterCollection additionalInfo, IParameterValueConverter[] customConverters, out List<object> itemValues)
+        private static IEnumerable<Parameter> GetListItemsAsParameters(Parameter parameter, ParameterCollection additionalInfo, IParameterValueConverter[] customConverters)
         {
             var result = new List<Parameter>();
             if (parameter.Type == ParameterType.String_IEnumerable) 
@@ -203,10 +325,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 }
                 for(var i = 0; i < items.Length; i++)
                 {
-                    result.Add(new Parameter(i.ToString(), items[i], ParameterType.String, additionalInfo, null, customConverters));
+                    result.Add(new Parameter((i+1).ToString(), items[i], ParameterType.String, additionalInfo, null, customConverters));
                 }
-                itemValues = items.ToList<dynamic>();
-                return result;
             }
             else if (parameter.Type == ParameterType.String_Multiline_IEnumerable) 
             {
@@ -217,10 +337,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 }
                 for(var i = 0; i < items.Length; i++)
                 {
-                    result.Add(new Parameter(i.ToString(), items[i], ParameterType.String_Multiline, additionalInfo, null, customConverters));
+                    result.Add(new Parameter((i+1).ToString(), items[i], ParameterType.String_Multiline, additionalInfo, null, customConverters));
                 }
-                itemValues = items.ToList<dynamic>();
-                return result;
             }
             else if (parameter.Type == ParameterType.Int_IEnumerable) 
             {
@@ -231,10 +349,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 }
                 for(var i = 0; i < items.Length; i++)
                 {
-                    result.Add(new Parameter(i.ToString(), items[i], ParameterType.Int, additionalInfo, null, customConverters));
+                    result.Add(new Parameter((i+1).ToString(), items[i], ParameterType.Int, additionalInfo, null, customConverters));
                 }
-                itemValues = items.Select(x => (dynamic)x).ToList();
-                return result;
             }
             else if (parameter.Type == ParameterType.Decimal_IEnumerable) 
             {
@@ -245,10 +361,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 }
                 for(var i = 0; i < items.Length; i++)
                 {
-                    result.Add(new Parameter(i.ToString(), items[i], ParameterType.Decimal, additionalInfo, null, customConverters));
+                    result.Add(new Parameter((i+1).ToString(), items[i], ParameterType.Decimal, additionalInfo, null, customConverters));
                 }
-                itemValues = items.Select(x => (object)x).ToList();
-                return result;
             }
             else if (parameter.Type == ParameterType.Bool_IEnumerable) 
             {
@@ -259,10 +373,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 }
                 for(var i = 0; i < items.Length; i++)
                 {
-                    result.Add(new Parameter(i.ToString(), items[i], ParameterType.Bool, additionalInfo, null, customConverters));
+                    result.Add(new Parameter((i+1).ToString(), items[i], ParameterType.Bool, additionalInfo, null, customConverters));
                 }
-                itemValues = items.Select(x => (object)x).ToList();
-                return result;
             }
             else if (parameter.Type == ParameterType.DateTime_IEnumerable) 
             {
@@ -273,10 +385,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 }
                 for(var i = 0; i < items.Length; i++)
                 {
-                    result.Add(new Parameter(i.ToString(), items[i], ParameterType.DateTime, additionalInfo, null, customConverters));
+                    result.Add(new Parameter((i+1).ToString(), items[i], ParameterType.DateTime, additionalInfo, null, customConverters));
                 }
-                itemValues = items.Select(x => (object)x).ToList();
-                return result;
             }
             else if (parameter.Type == ParameterType.Date_IEnumerable) 
             {
@@ -287,10 +397,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 }
                 for(var i = 0; i < items.Length; i++)
                 {
-                    result.Add(new Parameter(i.ToString(), items[i], ParameterType.Date, additionalInfo, null, customConverters));
+                    result.Add(new Parameter((i+1).ToString(), items[i], ParameterType.Date, additionalInfo, null, customConverters));
                 }
-                itemValues = items.Select(x => (object)x).ToList();
-                return result;
             }
             else if (parameter.Type == ParameterType.ParameterCollection_IEnumerable) 
             {
@@ -301,13 +409,11 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
                 }
                 for(var i = 0; i < items.Length; i++)
                 {
-                    result.Add(new Parameter(i.ToString(), items[i], ParameterType.ParameterCollection, additionalInfo, null, customConverters));
+                    result.Add(new Parameter((i+1).ToString(), items[i], ParameterType.ParameterCollection, additionalInfo, null, customConverters));
                 }
-                itemValues = items.ToList<object>();
-                return result;
             }
 
-            throw new NotSupportedException("We don't support " + parameter.Type + " as an IEnumerable.");
+            return result;
         }
 
         private static IParameterComponentDefinition[] GetComponentList(IParameterComponentDefinition[] customParameterComponents)
@@ -319,6 +425,31 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents.De
             else 
             {
                 return Extensions.DefaultParameterComponents;
+            }
+        }
+
+        private static Type ToType(ParameterType parameterType)
+        {
+            switch (parameterType)
+            {
+                case ParameterType.String_IEnumerable:
+                    return typeof(List<string>);
+                case ParameterType.String_Multiline_IEnumerable:
+                    return typeof(List<string>);
+                case ParameterType.Int_IEnumerable:
+                    return typeof(List<long>);
+                case ParameterType.Decimal_IEnumerable:
+                    return typeof(List<decimal>);
+                case ParameterType.Bool_IEnumerable:
+                    return typeof(List<bool>);
+                case ParameterType.DateTime_IEnumerable:
+                    return typeof(List<DateTime>);
+                case ParameterType.Date_IEnumerable:
+                    return typeof(List<DateTime>);
+                case ParameterType.ParameterCollection_IEnumerable:
+                    return typeof(List<ParameterCollection>);
+                default:
+                    throw new NotSupportedException("We don't support " + parameterType + " as an IEnumerable.");
             }
         }
     }

@@ -6,7 +6,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters
 {
     public class FileTypeConverter : ParameterCollectionParameterConverter<FileType>
     {
-        protected override bool CanConvertFromParameterCollection(ParameterCollection value, IEnumerable<IParameterValueConverter> customConverters)
+        protected override bool CanConvertFromParameterCollection(ParameterCollection value, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters)
         {
             return value.HasKeyAndCanConvertTo("descriptiveText", typeof(string), customConverters)
                 && value.HasKeyAndCanConvertTo("extensions", typeof(string[]), customConverters)
@@ -14,12 +14,12 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters
                 && value.HasKeyAndCanConvertTo("uTTypes", typeof(string[]), customConverters);
         }
 
-        protected override bool CanConvertToParameterCollection(FileType value, IEnumerable<IParameterValueConverter> customConverters)
+        protected override bool CanConvertToParameterCollection(FileType value, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters)
         {
             return true;
         }
 
-        protected override FileType ConvertFromParameterCollection(ParameterCollection value, IEnumerable<IParameterValueConverter> customConverters)
+        protected override FileType ConvertFromParameterCollection(ParameterCollection value, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters)
         {
             return new FileType(value.GetByKey<string>("descriptiveText", customConverters),
                 value.GetByKey<string[]>("extensions", customConverters),
@@ -27,7 +27,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters
                 value.GetByKey<string[]>("uTTypes", customConverters));
         }
 
-        protected override ParameterCollection ConvertToParameterCollection(FileType value, IEnumerable<IParameterValueConverter> customConverters)
+        protected override ParameterCollection ConvertToParameterCollection(FileType value, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters)
         {
             return new ParameterCollection 
             {
@@ -36,6 +36,11 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters
                 { "mimeTypes", value.MimeTypes, ParameterType.String_IEnumerable, null, customConverters },
                 { "uTTypes", value.UTTypes, ParameterType.String_IEnumerable, null, customConverters }
             };
+        }
+
+        protected override FileType GetDefaultValue(IEnumerable<FileType> value, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters)
+        {
+            return new FileType(string.Empty, null, null, null);
         }
     }
 }

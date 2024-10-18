@@ -1,5 +1,4 @@
 ﻿using System;
-using Avalonia.Media;
 using YngveHestem.FileTypeInfo;
 using YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters;
 using YngveHestem.GenericParameterCollection.ParameterValueConverters;
@@ -7,7 +6,7 @@ using YngveHestem.GenericParameterCollection.ParameterValueConverters;
 namespace YngveHestem.GenericParameterCollection.Avalonia
 {
     [AttributeConvertible]
-    	public class ParameterCollectionViewOptions
+    	public class ParameterCollectionViewOptions : ICloneable
     	{
             public static readonly IParameterValueConverter[] OptionsParameterConverters = new IParameterValueConverter[]
             {
@@ -146,6 +145,8 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
             /// </summary>
             [ParameterProperty("fileTypeMappings")]
             [AdditionalInfo("tooltip", "List of different file types and mappings between extensions, UTType (UTI) and mime-types. All file extensions in SupportedFileExtensions must be defined here to be supported. Default value is all the values that is defined in the library used. Check for yourself if you need to add your own values.")]
+            [AdditionalInfo("expanderOptions.isExpanded", false, KeyIsPath = true)]
+            [AdditionalInfo("expanderOptions.loadContentOnlyWhenExpanding", true, KeyIsPath = true)]
             public FileType[] FileTypeMappings = FileTypes.Types;
 
             /// <summary>
@@ -358,7 +359,14 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
             [AdditionalInfo("tooltip", "The text to use as a replacement for value, if it is not possible to convert the value to string. This is for instance used on the aria-helptext if the given value can not be converted to string.")]
             public string ValueCanNotBeConvertedToStringText = "Value is not easy to read as a single string.";
 
-            public ParameterCollectionViewOptions CreateCopy()
+            /// <summary>
+            /// What will the name used on each item shown on an IEnumerable. Mark that based on other parameters, the name will not always be shown, but it will also be used as Aria-labels to identify each item. Use {0} to get the parametername on the IEnumerable, and {0} to get the item number.
+            /// </summary>
+            [ParameterProperty("iEnumerableSingleItemName")]
+            [AdditionalInfo("tooltip", "What will the name used on each item shown on an IEnumerable. Mark that based on other parameters, the name will not always be shown, but it will also be used as Aria-labels to identify each item. Use {0} to get the parametername on the IEnumerable, and {0} to get the item number.")]
+            public string IEnumerableSingleItemName = "{0} {1}";
+
+            private ParameterCollectionViewOptions CreateCopy()
             {
                 return new ParameterCollectionViewOptions
                 {
@@ -401,15 +409,16 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
                     SelectManyExtraParametersGetOwnParent = SelectManyExtraParametersGetOwnParent,
                     SelectManyExtraParametersName = SelectManyExtraParametersName,
                     IsNullable = IsNullable,
-                    BorderOptions = BorderOptions,
-                    ExpanderOptions = ExpanderOptions,
+                    BorderOptions = (BorderOptions)BorderOptions.Clone(),
+                    ExpanderOptions = (ExpanderOptions)ExpanderOptions.Clone(),
                     ByteSizeText = ByteSizeText,
                     FilenameText = FilenameText,
                     PreviewOfThisContentNotAvailableText = PreviewOfThisContentNotAvailableText,
                     NoBytesSelectedText = NoBytesSelectedText,
                     MaxFileSizeErrorText = MaxFileSizeErrorText,
                     SetToNullButtonText = SetToNullButtonText,
-                    ValueCanNotBeConvertedToStringText = ValueCanNotBeConvertedToStringText
+                    ValueCanNotBeConvertedToStringText = ValueCanNotBeConvertedToStringText,
+                    IEnumerableSingleItemName = IEnumerableSingleItemName
                 };
             }
 
@@ -710,7 +719,17 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
                     options.ValueCanNotBeConvertedToStringText = parameters.GetByKey<string>("valueCanNotBeConvertedToStringText");
                 }
 
+                if (parameters.HasKeyAndCanConvertTo("iEnumerableSingleItemName", typeof(string)))
+                {
+                    options.IEnumerableSingleItemName = parameters.GetByKey<string>("valueCanNotBeConvertedToStringText");
+                }
+
                 return options;
             }
-    	}
+
+        public object Clone()
+        {
+            return CreateCopy();
+        }
+    }
 }

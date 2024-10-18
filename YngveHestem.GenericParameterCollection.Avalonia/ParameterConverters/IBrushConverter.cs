@@ -10,31 +10,36 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters
 {
     public class IBrushConverter : IParameterValueConverter
     {
-        public bool CanConvertFromParameter(ParameterType sourceType, Type targetType, JToken rawValue, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
+        public bool CanConvertFromParameter(ParameterType sourceType, Type targetType, JToken rawValue, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
         {
             return targetType == typeof(IBrush) && sourceType == ParameterType.String;
         }
 
-        public bool CanConvertFromValue(ParameterType targetType, Type sourceType, object value, IEnumerable<IParameterValueConverter> customConverters)
+        public bool CanConvertFromValue(ParameterType targetType, Type sourceType, object value, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters)
         {
             return ((sourceType == typeof(IBrush) && value == null) || typeof(ISolidColorBrush).IsAssignableFrom(sourceType)) && targetType == ParameterType.String;
         }
 
-        public object ConvertFromParameter(ParameterType sourceType, Type targetType, JToken rawValue, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
+        public object ConvertFromParameter(ParameterType sourceType, Type targetType, JToken rawValue, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
         {
             if (rawValue == null || rawValue.Type == JTokenType.Null) 
             {
                 return null;
             }
-            if (!Color.TryParse(rawValue.ToObject<string>(jsonSerializer), out var color))
+            var value = rawValue.ToObject<string>(jsonSerializer);
+            if (string.IsNullOrEmpty(value))
             {
-                throw new ArgumentException("The value in the parameter could not be converted to a color.");
+                return null;
+            }
+            if (!Color.TryParse(value, out var color))
+            {
+                return new ImmutableSolidColorBrush(Colors.Black); // If could not parse, be gentle and return the default color black.
             }
 
             return new ImmutableSolidColorBrush(color);
         }
 
-        public JToken ConvertFromValue(ParameterType targetType, Type sourceType, object value, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
+        public JToken ConvertFromValue(ParameterType targetType, Type sourceType, object value, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
         {
             if (value == null)
             {

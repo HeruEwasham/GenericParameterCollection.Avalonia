@@ -1,11 +1,12 @@
-﻿using Avalonia;
+﻿using System;
+using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Immutable;
 
 namespace YngveHestem.GenericParameterCollection.Avalonia
 {
     [AttributeConvertible]
-    public class StandardUiOptions
+    public class StandardUiOptions : ICloneable
     {
         /// <summary>
         /// Specifies how the background should look. Set to null for no specific background.
@@ -81,5 +82,14 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
                 Padding = parameters.GetByKey<Thickness>("padding", ParameterCollectionViewOptions.OptionsParameterConverters);
             }
         }
+
+        public object Clone()
+        {
+            var clone = (StandardUiOptions)MemberwiseClone();
+            HandleCloned(clone);
+            return clone;
+        }
+
+        protected virtual void HandleCloned(StandardUiOptions clone) {}
     }
 }

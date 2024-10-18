@@ -9,17 +9,17 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters
 {
     public class CornerRadiusConverter : IParameterValueConverter
     {
-        public bool CanConvertFromParameter(ParameterType sourceType, Type targetType, JToken rawValue, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
+        public bool CanConvertFromParameter(ParameterType sourceType, Type targetType, JToken rawValue, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
         {
             return targetType == typeof(CornerRadius) && (sourceType == ParameterType.String || sourceType == ParameterType.Int || sourceType == ParameterType.Decimal);
         }
 
-        public bool CanConvertFromValue(ParameterType targetType, Type sourceType, object value, IEnumerable<IParameterValueConverter> customConverters)
+        public bool CanConvertFromValue(ParameterType targetType, Type sourceType, object value, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters)
         {
             return sourceType == typeof(CornerRadius) && (targetType == ParameterType.String || ((CornerRadius)value).IsUniform && (targetType == ParameterType.Int || targetType == ParameterType.Decimal));
         }
 
-        public object ConvertFromParameter(ParameterType sourceType, Type targetType, JToken rawValue, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
+        public object ConvertFromParameter(ParameterType sourceType, Type targetType, JToken rawValue, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
         {
             if (rawValue == null || rawValue.Type == JTokenType.Null) 
             {
@@ -37,7 +37,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia.ParameterConverters
             throw new ArgumentException("The values was not supported to be converted by " + nameof(CornerRadiusConverter));
         }
 
-        public JToken ConvertFromValue(ParameterType targetType, Type sourceType, object value, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
+        public JToken ConvertFromValue(ParameterType targetType, Type sourceType, object value, ParameterCollection additionalInfo, IEnumerable<IParameterValueConverter> customConverters, JsonSerializer jsonSerializer)
         {
             if (value == null)
             {

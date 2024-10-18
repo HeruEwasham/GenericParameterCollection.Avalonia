@@ -289,6 +289,7 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
+        Title = "Testproject for GenericParameterCollection.Avalonia";
         _currentParameterCollectionAsText = new TextBox 
         { 
             AcceptsReturn = true,

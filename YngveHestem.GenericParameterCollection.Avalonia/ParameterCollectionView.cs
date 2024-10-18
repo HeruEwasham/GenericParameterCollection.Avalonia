@@ -144,9 +144,9 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
                     {
                         var def = _parameterComponents.First(p => p.ShouldComponentBeUsed(parameter, additionalInfo, localOptions, CustomConverters));
                         var parentType = def.GetHowParameterNameIsShown(parameter, additionalInfo, localOptions, CustomConverters);
-                        var component = def.GetComponent(parameter, parameterText, additionalInfo, localOptions, CustomConverters, CustomParameterComponents, (value, adInfo) => ChangeParameter(parameter.Key, value, adInfo));
                         if (parentType == ComponentParentType.None)
                         {
+                            var component = def.GetComponent(parameter, parameterText, additionalInfo, localOptions, CustomConverters, CustomParameterComponents, (value, adInfo) => ChangeParameter(parameter.Key, value, adInfo));
                             if (additionalInfo.HasKeyAndCanConvertTo(localOptions.TooltipParameterTextKey, typeof(string))) 
                             {
                                 ToolTip.SetTip(component, additionalInfo.GetByKey<string>(localOptions.TooltipParameterTextKey));
@@ -156,6 +156,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
                         }
                         else if (parentType == ComponentParentType.Border || parentType == ComponentParentType.BorderWithoutName)
                         {
+                            var component = def.GetComponent(parameter, parameterText, additionalInfo, localOptions, CustomConverters, CustomParameterComponents, (value, adInfo) => ChangeParameter(parameter.Key, value, adInfo));
                             var border = new Border
                             {
                                 Background = localOptions.BorderOptions.Background,
@@ -205,9 +206,38 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
                                 Header = new TextBlock {
                                     Text = parameterText,
                                     FontWeight = FontWeight.Bold,
-                                },
-                                Content = component
+                                }
                             };
+                            if (!localOptions.ExpanderOptions.LoadContentOnlyWhenExpanding)
+                            {
+                                expander.Content = def.GetComponent(parameter, parameterText, additionalInfo, localOptions, CustomConverters, CustomParameterComponents, (value, adInfo) => ChangeParameter(parameter.Key, value, adInfo));
+                            }
+                            else
+                            {
+                                expander.Expanding += (s, e) =>
+                                {
+                                    var exp = (Expander)s;
+                                    if (exp.Content == null)
+                                    {
+                                        exp.Content = def.GetComponent(parameter, parameterText, additionalInfo, localOptions, CustomConverters, CustomParameterComponents, (value, adInfo) => ChangeParameter(parameter.Key, value, adInfo));
+                                    }
+                                };
+
+                                if (localOptions.ExpanderOptions.UnloadContentWhenCollapsed)
+                                {
+                                    expander.Collapsed += (s, e) =>
+                                    {
+                                        ((Expander)s).Content = null;
+                                        GC.Collect();
+                                        GC.WaitForPendingFinalizers();
+                                    };
+                                }
+                                
+                                if (expander.IsExpanded && expander.Content == null)
+                                {
+                                    expander.Content = def.GetComponent(parameter, parameterText, additionalInfo, localOptions, CustomConverters, CustomParameterComponents, (value, adInfo) => ChangeParameter(parameter.Key, value, adInfo));
+                                }
+                            }
 
                             if (additionalInfo.HasKeyAndCanConvertTo(localOptions.TooltipParameterTextKey, typeof(string))) 
                             {
