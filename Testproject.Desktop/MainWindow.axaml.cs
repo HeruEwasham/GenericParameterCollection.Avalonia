@@ -3,6 +3,8 @@ using Avalonia.Controls;
 using Avalonia.Rendering.Composition;
 using YngveHestem.GenericParameterCollection;
 using YngveHestem.GenericParameterCollection.Avalonia;
+using YngveHestem.GenericParameterCollection.Avalonia.ParameterComponents;
+using YngveHestem.GenericParameterCollection.ParameterValueConverters;
 
 namespace Testproject.Desktop;
 
@@ -34,12 +36,12 @@ public partial class MainWindow : Window
                 { "Select an option", "Option 5", new string[] { "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", "Option 6" } }
             }
         },
-        /*{ "Example color with custom component", "rgb(0, 255, 0)",
+        { "Example color with custom component", "red",
             new ParameterCollection
             {
                 { "type", "color" }
             }
-        },*/
+        },
         { "Select some bytes", new byte[] {1, 3, 5} },
         { "Are this any good?", true },
         { "What blend mode do you like best?", CompositionBlendMode.ColorBurn },
@@ -287,6 +289,16 @@ public partial class MainWindow : Window
         PlaceholderText = "This is a placeholder text."
     };
 
+    private IParameterValueConverter[] _customConverters = new IParameterValueConverter[]
+    {
+        new ColorConverter()
+    };
+
+    private IParameterComponentDefinition[] _customComponents = new IParameterComponentDefinition[]
+    {
+        new ColorPickerComponent()
+    };
+
     public MainWindow()
     {
         Title = "Testproject for GenericParameterCollection.Avalonia";
@@ -304,7 +316,7 @@ public partial class MainWindow : Window
             Text = "Debug window ready",
             Height = 100
         };
-        _parameterCollectionView = new ParameterCollectionView(_parameters, _options)
+        _parameterCollectionView = new ParameterCollectionView(_parameters, _options, _customComponents, _customConverters)
         {
             Height = 500
         };
