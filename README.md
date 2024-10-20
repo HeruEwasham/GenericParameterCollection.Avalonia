@@ -42,7 +42,9 @@ Do you have some custom converters you need to use for converting some custom va
 
 #### Example code
 
-TODO
+Please see the TestProject for some example-codde on how you can use it (https://github.com/HeruEwasham/GenericParameterCollection.Avalonia/blob/main/Testproject.Desktop/MainWindow.axaml.cs). Mark that this is only one way to do it.
+
+The Testproject uses two ParameterCollectionViews (the main one, and the options-one), and if you change the options-one, it will update the main with the changed options.
 
 ### Options
 
