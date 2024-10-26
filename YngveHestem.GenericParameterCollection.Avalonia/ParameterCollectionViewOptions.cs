@@ -721,7 +721,7 @@ namespace YngveHestem.GenericParameterCollection.Avalonia
 
                 if (parameters.HasKeyAndCanConvertTo("iEnumerableSingleItemName", typeof(string)))
                 {
-                    options.IEnumerableSingleItemName = parameters.GetByKey<string>("valueCanNotBeConvertedToStringText");
+                    options.IEnumerableSingleItemName = parameters.GetByKey<string>("iEnumerableSingleItemName");
                 }
 
                 return options;
